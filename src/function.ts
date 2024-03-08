@@ -1,16 +1,16 @@
 import * as t from '@babel/types';
-import { getAstNodeName } from './utils';
-import { Arguemnt } from './arguemnt';
+import { AstNodeIterator, getAstNodeName } from './utils';
+import { EaArguemnt } from './arguemnt';
 
 
-export class Function{
+export class EaFunction{
     private _ast?:t.FunctionDeclaration
-    private _args:Arguemnt[] = []
-    constructor(ast:t.Node){
-        if(ast.type !== "FunctionDeclaration"){
+    private _args:AstNodeIterator<EaArguemnt,t.Identifier | t.RestElement | t.Pattern> | undefined
+    constructor(node:t.Node){
+        if(node.type !== "FunctionDeclaration"){
             throw new Error("Function must be FunctionDeclaration")
         }
-        this._ast = ast
+        this._ast = node
     }
     get ast(){return this._ast!}
     /**
@@ -42,11 +42,10 @@ export class Function{
      */
     get args(){
         if(!this._args){
-            this.ast.params.map((param)=>{
-                this._args.push(new Arguemnt(param))
+            this._args = new AstNodeIterator<EaArguemnt,t.Identifier | t.RestElement | t.Pattern>(this.ast.params,(param)=>{
+                return new EaArguemnt(param)
             })
-            return []
         }
-        return this._args
+        return this._args!
     }
 }

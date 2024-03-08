@@ -7,12 +7,20 @@ import { EasyAST } from "../src"
 
 describe("jscode",()=>{
     const jscode = fs.readFileSync(path.join(__dirname,"code.js")).toString()
-    let ast = new EasyAST(jscode)
+    let code = new EasyAST(jscode)
     beforeEach(()=>{
     
     })    
     test("test",()=>{
-        console.log(jscode)
+        for(const func of code.functions){
+            console.log(func.name,'async=',func.async,"generator=",func.generator)
+            for(const arg of func.args){
+                console.log(arg.name ,'=' ,arg.defaultValue)
+            }
+            console.log("------")
+        }
+
+
         expect(1).toBe(1)
     })
 })

@@ -4,11 +4,7 @@
  *
  */
 
-export class Variable{
+export class EaVariable{
 
 }
 
-
-export class Variables{
-
-}

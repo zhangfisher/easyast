@@ -21,7 +21,7 @@ export interface FunctionArguemntType{
  * arg.ast 获取参数的ast节点
  * 
  */
-export class Arguemnt{
+export class EaArguemnt{
     constructor(public ast:t.Identifier | t.RestElement | t.Pattern){
         
     }
@@ -35,33 +35,31 @@ export class Arguemnt{
         return this.ast.loc
     }
     /**
+     * typescript数据类型
+     */
+    get datatype(){
+        return ""
+    }
+    /**
      * 参数默认值
      * 由于参数的默认值可能是一个表达式或是一个非常复杂的结构，因此这里只返回一个简单的类型
-     * 
-     * {
-     *   type:'Literal' | 'Expression' | 'RegExp' | 'Template' | 'Object' | 'Array' | 'Function' | 'Null' | 'Undefined'
-     *   value:any
-     * }
      * 
      */
     get defaultValue(){
         if(t.isAssignmentPattern(this.ast)){
-            if(this.ast.right){
-                if(t.isNullLiteral(this.ast.right)){
-                    return null
-                }else if(t.isRegExpLiteral(this.ast.right)){
-                    return this.ast.right
-                }else if(t.isTemplateLiteral(this.ast.right)){
-                    return this.ast.right
-                }else if(t.isLiteral(this.ast.right)){
-                    return this.ast.right.value
-                }
+            if(t.isNullLiteral(this.ast.right)){
+                return null
+            }else if(t.isRegExpLiteral(this.ast.right)){
+                return this.ast.right
+            }else if(t.isTemplateLiteral(this.ast.right)){
+                return this.ast.right
+            }else if(t.isLiteral(this.ast.right)){
+                return this.ast.right.value
+            }else{// 直接返回ast节点
+                return this.ast.right
             }
-        }else if(t.isRestElement(this.ast)){
-           return undefined
-        }else if(t.isIdentifier(this.ast)){
+        }else{
             return undefined
-        }        
-        return 
+        }         
     }
 }

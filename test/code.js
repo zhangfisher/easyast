@@ -1,10 +1,14 @@
 
 ()=>{}
 
+
+
 const v1 = require('./a');
 const v2 = 1
 const v3 = 2
 let vx = 1,vy=2,vz=3;
+1+1
+1+2*2+v2+v3*vy
 
 function a(){
     console.log('I am a');

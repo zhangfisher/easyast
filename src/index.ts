@@ -31,6 +31,9 @@ import * as parser from "@babel/parser";
 import type {} from "@babel/parser";
 import traverse from "@babel/traverse";
 import * as t from "@babel/types";
+import { AstNodeIterator } from "./utils";
+import { EaFunction } from "./function";
+import { BlockStatement } from "./blockStatement";
 
 export interface EasyASTOptions{
     typescript: boolean;
@@ -38,12 +41,16 @@ export interface EasyASTOptions{
     plugins:any[],
 }
 
-export class EasyAST {
+
+
+export class EasyAST{
     options: EasyASTOptions;
     private _ast:any
+    private body:BlockStatement 
     constructor(code: string, options?: EasyASTOptions) {
         this.options =Object.assign({},options)
         this.parse(code); 
+        this.body = new BlockStatement(this.ast.program.body)
     }
     get ast(){
         return this._ast!
@@ -56,12 +63,11 @@ export class EasyAST {
         this._ast = parser.parse(code)
     }
     /**
-     * 获取所有函数 
+     * 获取所有函数的迭代器
      */
     get functions(){
-        return this.ast.program.body.filter((node:any)=>t.isFunctionDeclaration(node))
+        return this.body.functions
     }
-    
 
 
 }
