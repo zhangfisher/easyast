@@ -31,14 +31,19 @@ import * as parser from "@babel/parser";
 import type {} from "@babel/parser";
 import traverse from "@babel/traverse";
 import * as t from "@babel/types";
-import { AstNodeIterator } from "./utils";
+import { FlexIterator } from "./utils";
 import { EaFunction } from "./function";
-import { BlockStatement } from "./blockStatement";
+import { EaStatement } from "./statement";
 
 export interface EasyASTOptions{
     typescript: boolean;
     jsx: boolean;    
     plugins:any[],
+    /**
+     * 获取字面量的值
+     * @param node 
+     */
+    getLitervalValue(node:t.Literal):any
 }
 
 
@@ -46,11 +51,11 @@ export interface EasyASTOptions{
 export class EasyAST{
     options: EasyASTOptions;
     private _ast:any
-    private body:BlockStatement 
+    private body:EaStatement 
     constructor(code: string, options?: EasyASTOptions) {
         this.options =Object.assign({},options)
         this.parse(code); 
-        this.body = new BlockStatement(this.ast.program.body)
+        this.body = new EaStatement(this.ast.program,undefined,this)
     }
     get ast(){
         return this._ast!
@@ -67,6 +72,12 @@ export class EasyAST{
      */
     get functions(){
         return this.body.functions
+    }
+    /**
+     * 返回获取所有变量声明的迭代器
+     */
+    get variables(){
+        return this.body.variables
     }
 
 

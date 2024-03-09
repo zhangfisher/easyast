@@ -1,23 +1,39 @@
 import * as t from '@babel/types';
-import { AstNodeIterator, getAstNodeName } from './utils';
+import { FlexIterator, getAstNodeName } from './utils';
 import { EaArguemnt } from './arguemnt';
+import { EaObject, EaObjectProps } from './base';
+import { EaStatement } from './statement';
+import  generate from '@babel/generator';
 
+/**
+ * 创建一个函数对象
+ * 
+ * - 传入一个FunctionDeclaration节点对象
+ * new EaFunction(t.FunctionDeclaration)
+ * - 传入一个节点对象 
+ * new EaFunction({
+ *    name:"函数名称",
+ *    async:true,
+ *    generator:true,
+ *    args:[EaArguemnt,EaArguemnt] 
+ * })
+ * 
+ */
+export interface EaFunctionProps extends EaObjectProps{
+    name?:string
+    async?:boolean
+    generator?:boolean    
+    arrow?:boolean
+    args?:EaArguemnt[]
+    code?:string            // 函数代码
+}
 
-export class EaFunction{
-    private _ast?:t.FunctionDeclaration
-    private _args:AstNodeIterator<EaArguemnt,t.Identifier | t.RestElement | t.Pattern> | undefined
-    constructor(node:t.Node){
-        if(node.type !== "FunctionDeclaration"){
-            throw new Error("Function must be FunctionDeclaration")
-        }
-        this._ast = node
-    }
-    get ast(){return this._ast!}
-    /**
-    * 函数体在源代码中的位置
-    */
-    get loc(){
-        return this.ast.loc
+export class EaFunction extends EaObject<t.FunctionDeclaration , EaFunctionProps>{
+    private _args?:FlexIterator<t.Identifier | t.RestElement | t.Pattern,EaArguemnt>      
+    private _body?:EaStatement
+    private _funcDescr?:string          // 函数描述，不包含函数体
+    protected createAstNode(props:EaFunctionProps){
+        //return t.functionDeclaration(t.identifier(props.name||""),[],t.blockStatement([]),props.async,props.generator,props.arrow)
     }
     /**
      * 函数名称
@@ -38,14 +54,49 @@ export class EaFunction{
         return this.ast.generator
     }
     /**
+     * 是否是箭头函数
+     */
+    get arrow(){
+        return false
+    }
+    get body(){
+        if(!this._body){
+            this._body = new EaStatement(this.ast.body,undefined)
+        }
+        return this._body
+    }
+    /**
+     * 函数返回值
+     */
+    get returns(){
+        return this.body.body.filter((node:t.Node)=>{
+            return t.isReturnStatement(node)
+        })
+    }
+    /**
      * 函数参数
      */
     get args(){
         if(!this._args){
-            this._args = new AstNodeIterator<EaArguemnt,t.Identifier | t.RestElement | t.Pattern>(this.ast.params,(param)=>{
-                return new EaArguemnt(param)
+            this._args = new FlexIterator<t.Identifier | t.RestElement | t.Pattern,EaArguemnt>(this.ast.params,{
+                transform:(param)=>{
+                    return new EaArguemnt(param)
+                }
             })
         }
         return this._args!
     }
+    private getArgNames(){
+        return this.ast.params.map((param)=>getAstNodeName(param))
+    
+    }
+    toString(){
+        if(!this._funcDescr){
+            const node = t.cloneNode(this.ast,false,true)
+            node.body = t.blockStatement([])
+            this._funcDescr = generate(node).code
+        }
+        return this._funcDescr!
+    }
+    
 }

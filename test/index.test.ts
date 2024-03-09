@@ -12,6 +12,10 @@ describe("jscode",()=>{
     
     })    
     test("test",()=>{
+        for(const varObj of code.variables){
+            console.log(varObj.name,'=',varObj.value)
+        }
+        console.log("------")
         for(const func of code.functions){
             console.log(func.name,'async=',func.async,"generator=",func.generator)
             for(const arg of func.args){
@@ -19,6 +23,9 @@ describe("jscode",()=>{
             }
             console.log("------")
         }
+
+        
+      
 
 
         expect(1).toBe(1)

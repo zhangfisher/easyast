@@ -10,14 +10,10 @@ import { EaObject,EaObjectProps } from './base';
 import { getAstLiteralValue } from './utils';
 import generate from '@babel/generator';
 
-export interface EaVariableProps extends EaObjectProps{
-    name:string
-    datatype:string
-    value:any
-    kind:t.VariableDeclaration['kind']
+export interface EaClassProps extends EaObjectProps{ 
 }
-export class EaVariable extends EaObject<t.VariableDeclarator,EaVariableProps>{
-    private _varDescr?:string           // 变量声明，如果有函数
+export class EaClass extends EaObject<t.VariableDeclarator,EaClassProps>{
+    private _varDescr?:string            
     get name(){
         return t.isIdentifier(this.ast.id) ? this.ast.id.name : ''
     }
