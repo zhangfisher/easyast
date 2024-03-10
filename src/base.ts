@@ -6,11 +6,14 @@ export interface EaObjectProps extends Record<string,any>{
 
 }
 
+export type IdentifierNode = t.Node & {
+    id?: t.Identifier | null;
+}
+
 export class EaObject<AST extends t.Node=t.Node,Props extends EaObjectProps = EaObjectProps>{
     private _ast?:AST
     private _parentAst?:t.Node
-    private astOptions?:EasyAST
-    constructor(node:t.Node | Props,parentNode?:t.Node,astOptions?:EasyAST){
+    constructor(node:t.Node | Props,parentNode?:t.Node){
         if(t.isNode(node)){
             this._ast = node as AST
         }else if(typeof(node)=='object'){
@@ -47,4 +50,17 @@ export class EaObject<AST extends t.Node=t.Node,Props extends EaObjectProps = Ea
     toString(){
         return this.code   
     }
+    findFunction(name:string){
+
+    }
+    findLiteral(value:any){
+
+    }
+    findVariable(name:string){
+
+    }
+    findClass(name:string){
+
+    }
+
 }

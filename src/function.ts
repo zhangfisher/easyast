@@ -1,7 +1,7 @@
 import * as t from '@babel/types';
 import { FlexIterator, getAstNodeName } from './utils';
 import { EaArguemnt } from './arguemnt';
-import { EaObject, EaObjectProps } from './base';
+import { EaObject, EaObjectProps, IdentifierNode } from './base';
 import { EaStatement } from './statement';
 import  generate from '@babel/generator';
 
@@ -28,11 +28,15 @@ export interface EaFunctionProps extends EaObjectProps{
     code?:string            // 函数代码
 }
 
-export class EaFunction extends EaObject<t.FunctionDeclaration , EaFunctionProps>{
+export type LikeFunctionNode = IdentifierNode & t.FunctionDeclaration 
+
+ 
+export class EaFunction<Declaration extends LikeFunctionNode = t.FunctionDeclaration ,Props extends EaFunctionProps= EaFunctionProps> extends EaObject<Declaration , Props>{
     private _args?:FlexIterator<t.Identifier | t.RestElement | t.Pattern,EaArguemnt>      
     private _body?:EaStatement
     private _funcDescr?:string          // 函数描述，不包含函数体
-    protected createAstNode(props:EaFunctionProps){
+
+    protected createAstNode(props:Props){
         //return t.functionDeclaration(t.identifier(props.name||""),[],t.blockStatement([]),props.async,props.generator,props.arrow)
     }
     /**
@@ -69,9 +73,11 @@ export class EaFunction extends EaObject<t.FunctionDeclaration , EaFunctionProps
      * 函数返回值
      */
     get returns(){
-        return this.body.body.filter((node:t.Node)=>{
+        const returnNode = this.body.body.filter((node:t.Node)=>{
             return t.isReturnStatement(node)
         })
+        if(returnNode.length==0) return undefined
+        return generate(returnNode[0],{compact:true}).code.substring(6)
     }
     /**
      * 函数参数
@@ -100,3 +106,6 @@ export class EaFunction extends EaObject<t.FunctionDeclaration , EaFunctionProps
     }
     
 }
+
+
+

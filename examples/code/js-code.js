@@ -24,27 +24,28 @@ const f3= function(){console.log('I am f1');return 1;}
 
 async function b(){
     console.log('I am b');
-    return 2;
+    return {x:1,y:2};
 }
 
 async function c(x,y=2,z=a(),m=[],n= 1 & 2  & 3,...rest){
     console.log('I am c');
-    return 3;
+    return [1,2,3];
 }
 
 async function d(x,y,...z){
     console.log('I am d');
-    return 4;
+    let a=1
+    return a;
 }
 
 function* e(x,y,z){
     console.log('I am e');
-    return 5;
+    let a=1,b
+    return a+b;
 }
 
 function f(x,y,...z){
-    console.log('I am f');
-    return 6;
+    console.log('I am f'); 
 }
 
 function g(x,
@@ -85,5 +86,8 @@ class C extends B{
     }
     getId(){
         console.log('I am getId');
+    }
+    *log(){
+
     }
 }

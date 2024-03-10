@@ -46,9 +46,7 @@ export class EaVariable extends EaObject<t.VariableDeclarator,EaVariableProps>{
         if(!this._varDescr){
             const node =t.cloneNode(this.ast,false,true)
             if(node.init){
-                if(t.isArrowFunctionExpression(node.init)){
-                    node.init.body = t.blockStatement([])
-                }else if(t.isFunctionExpression(node.init)){
+                if(t.isArrowFunctionExpression(node.init) || t.isFunctionExpression(node.init) ){
                     node.init.body = t.blockStatement([])
                 }else if(t.isTemplateLiteral(node.init)){
                     // 模板字符串有可能很大，不得于呈现

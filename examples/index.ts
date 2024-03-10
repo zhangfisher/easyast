@@ -14,5 +14,8 @@ for(const varObj of code.variables){
 console.log("------ functions ------")
 for(const func of code.functions){
     console.log(func.toString())
+    console.log("returns=",func.returns)
+    console.log("variables=",[...func.body.variables].map(v=>v.name).join(","))
+    console.log("------")
 }
 
