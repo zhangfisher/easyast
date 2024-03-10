@@ -1,7 +1,7 @@
 import * as t from '@babel/types';
-import { FlexIterator, getAstNodeName } from './utils';
+import { FlexIterator } from './utils';
 import { EaArguemnt } from './arguemnt';
-import { EaObject, EaObjectProps, IdentifierNode } from './base';
+import { EaObject, IEaObject } from './base';
 import { EaStatement } from './statement';
 import  generate from '@babel/generator';
 
@@ -19,7 +19,7 @@ import  generate from '@babel/generator';
  * })
  * 
  */
-export interface EaFunctionProps extends EaObjectProps{
+export interface EaFunctionProps extends IEaObject{
     name?:string
     async?:boolean
     generator?:boolean    
@@ -28,15 +28,13 @@ export interface EaFunctionProps extends EaObjectProps{
     code?:string            // 函数代码
 }
 
-export type LikeFunctionNode = IdentifierNode & t.FunctionDeclaration 
-
  
-export class EaFunction<Declaration extends LikeFunctionNode = t.FunctionDeclaration ,Props extends EaFunctionProps= EaFunctionProps> extends EaObject<Declaration , Props>{
+export class EaFunction extends EaObject<t.FunctionDeclaration , EaFunctionProps>{
     private _args?:FlexIterator<t.Identifier | t.RestElement | t.Pattern,EaArguemnt>      
     private _body?:EaStatement
     private _funcDescr?:string          // 函数描述，不包含函数体
 
-    protected createAstNode(props:Props){
+    protected createAstNode(props:EaFunctionProps){
         //return t.functionDeclaration(t.identifier(props.name||""),[],t.blockStatement([]),props.async,props.generator,props.arrow)
     }
     /**
@@ -91,11 +89,7 @@ export class EaFunction<Declaration extends LikeFunctionNode = t.FunctionDeclara
             })
         }
         return this._args!
-    }
-    private getArgNames(){
-        return this.ast.params.map((param)=>getAstNodeName(param))
-    
-    }
+    } 
     toString(){
         if(!this._funcDescr){
             const node = t.cloneNode(this.ast,false,true)
@@ -103,8 +97,7 @@ export class EaFunction<Declaration extends LikeFunctionNode = t.FunctionDeclara
             this._funcDescr = generate(node).code
         }
         return this._funcDescr!
-    }
-    
+    }    
 }
 
 

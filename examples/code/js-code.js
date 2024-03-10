@@ -76,7 +76,7 @@ class C extends B{
     static a='a'
     static b='b'
     x=1
-    y=2
+    y=2    
     constructor(){
         super();
         console.log('I am C');
@@ -86,8 +86,11 @@ class C extends B{
     }
     getId(){
         console.log('I am getId');
+        return '1'
     }
     *log(){
 
     }
+    print =()=>{}
+
 }

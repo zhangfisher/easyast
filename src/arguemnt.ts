@@ -22,7 +22,7 @@ export interface FunctionArguemntType{
  * 
  */
 export class EaArguemnt{
-    constructor(public ast:t.Identifier | t.RestElement | t.Pattern){
+    constructor(public ast:t.Identifier | t.RestElement | t.Pattern |  t.TSParameterProperty){
         
     }
     /**

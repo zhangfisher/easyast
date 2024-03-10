@@ -6,17 +6,18 @@
  */
 
 import * as t from '@babel/types';  
-import { EaObject,EaObjectProps } from './base';
+import { EaObject,IEaObject } from './base';
 import { getAstLiteralValue } from './utils';
 import generate from '@babel/generator';
 
-export interface EaVariableProps extends EaObjectProps{
+export interface IEaVariable extends IEaObject{
     name:string
     datatype:string
     value:any
-    kind:t.VariableDeclaration['kind']
+    kind:t.VariableDeclaration['kind'] | undefined
 }
-export class EaVariable extends EaObject<t.VariableDeclarator,EaVariableProps>{
+export class EaVariable extends EaObject<t.VariableDeclarator,IEaVariable> implements IEaVariable{
+    [x: string]: any; 
     private _varDescr?:string           // 变量声明，如果有函数
     get name(){
         return t.isIdentifier(this.ast.id) ? this.ast.id.name : ''
@@ -25,7 +26,7 @@ export class EaVariable extends EaObject<t.VariableDeclarator,EaVariableProps>{
      * 变量的数据类型
      * 即typescript类型
      */
-    get dataType(){
+    get datatype(){
         return ""
     }
     get value(){
@@ -39,8 +40,11 @@ export class EaVariable extends EaObject<t.VariableDeclarator,EaVariableProps>{
         if(!this.ast.init) return undefined
         return this.ast.init.type
     }
+    /**
+     * 变量声明方式：var let const
+     */
     get kind(){
-        return this.parent && (this.parent as t.VariableDeclaration).kind 
+        return this.parent && (this.parent as t.VariableDeclaration).kind
     } 
     toString(){
         if(!this._varDescr){

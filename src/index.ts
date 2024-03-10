@@ -55,7 +55,7 @@ export class EasyAST{
     constructor(code: string, options?: EasyASTOptions) {
         this.options =Object.assign({},options)
         this.parse(code); 
-        this.body = new EaStatement(this.ast.program,undefined,this)
+        this.body = new EaStatement(this.ast.program,undefined)
     }
     get ast(){
         return this._ast!

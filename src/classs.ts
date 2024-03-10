@@ -6,32 +6,194 @@
  */
 
 import * as t from '@babel/types';  
-import { EaObject,EaObjectProps } from './base';
+import { EaObject,IEaObject } from './base';
 import { FlexIterator } from './utils';
 import generate from '@babel/generator';
-import { EaStatement } from './statement';
-import { EaFunction } from './function';
+import { EaStatement } from './statement'; 
+import { EaArguemnt } from './arguemnt';
 
-export class EaClasMethod extends EaFunction<t.ClassMethod>{   
+
+export type IEaClassMethod = IEaObject & Pick<t.ClassMethod,
+    'abstract'
+    | 'computed'
+    | 'static'
+    | 'generator'
+    | 'async'
+    | 'abstract'
+    | 'access'
+    | 'optional'
+    | 'override' 
+    | 'decorators'
+> & {
+    readonly: boolean
+}
+
+
+export class EaClassMethod extends EaObject<t.ClassMethod , IEaClassMethod> implements IEaClassMethod{ 
+    private _args?:FlexIterator<t.Identifier | t.Pattern | t.RestElement | t.TSParameterProperty,EaArguemnt>      
+    private _body?:EaStatement
+    private _methodDescr?:string          
+
+    protected createAstNode(props:IEaClassMethod){
+        //return t.functionDeclaration(t.identifier(props.name||""),[],t.blockStatement([]),props.async,props.generator,props.arrow)
+    }
+    /**
+     * 函数名称
+     */
+    get name(){
+        return t.isIdentifier(this.ast.key) ? this.ast.key.name : ''
+    }
+    /**
+     * 是否是异步函数
+     */
+    get async(){
+        return this.ast.async
+    }
+    /**
+     * 是否是生成器函数
+     */
+    get generator(){
+        return this.ast.generator
+    }
+    /**
+     * 是否是静态方法
+     */
+    get static(){
+        return this.ast.static
+    } 
+    /**
+     * 是否是计算属性
+     */
     get computed(){
         return this.ast.computed    
     }
-    kind?:t.ClassMethod['kind']
+    /**
+     * 方法类型
+     */
+    get kind(){
+        return this.ast.kind    
+    }
+    /**
+     * 是否是可选方法
+     */
+    get optional(){
+        return this.ast.optional
+    }    
+    /**
+     * 是否是重载方法
+     */
+    get override(){
+        return this.ast.override
+    }
+    /**
+     * 是否是抽象方法
+     */
+    get abstract(){
+        return this.ast.override
+    }    
+    /**
+     * 是否是只读方法
+     */
+    get readonly(){
+        return false
+    }
+    /**
+     * 是否是箭头函数
+     */
+    get arrow(){
+        return false
+    }
+    get body(){
+        if(!this._body){
+            this._body = new EaStatement(this.ast.body,undefined)
+        }
+        return this._body
+    }
+    /**
+     * 函数返回值
+     */
+    get returns(){
+        const returnNode = this.body.body.filter((node:t.Node)=>{
+            return t.isReturnStatement(node)
+        })
+        if(returnNode.length==0) return undefined
+        return generate(returnNode[0],{compact:true}).code.substring(6)
+    }
+    /**
+     * 函数参数
+     */
+    get args(){
+        if(!this._args){
+            this._args = new FlexIterator<t.Identifier | t.Pattern | t.RestElement | t.TSParameterProperty,EaArguemnt>(this.ast.params,{
+                transform:(param)=>{
+                    return new EaArguemnt(param)
+                }
+            })
+        }
+        return this._args!
+    }
+    toString(){
+        if(!this._methodDescr){
+            const node = t.cloneNode(this.ast,false,true)
+            node.body = t.blockStatement([])
+            this._methodDescr = generate(node).code
+        }
+        return this._methodDescr!
+    }
+}
+ 
+ 
+
+export type IEaClassProperty = IEaObject & Pick<t.ClassProperty,
+    'abstract'
+    | 'computed'  
+    | 'abstract' 
+    | 'optional'
+    | 'readonly' 
+    | 'decorators'    
+> & {
+    access: t.ClassProperty['accessibility']
+    value:string
 }
 
-let d:EaClasMethod
+
+export class EaClassProperty extends EaObject<t.ClassProperty , IEaClassProperty> implements IEaClassProperty{
+    private _propertyDescr?:string          
+    protected createAstNode(props:IEaClassProperty){
+        //return t.functionDeclaration(t.identifier(props.name||""),[],t.blockStatement([]),props.async,props.generator,props.arrow)
+    }
+    get name(){
+        return t.isIdentifier(this.ast.key) ? this.ast.key.name : ''
+    }
+    get abstract(){
+        return this.ast.abstract
+    }
+    get computed(){
+        return this.ast.computed
+    }
+    get optional(){
+        return this.ast.optional
+    }
+    get readonly(){
+        return this.ast.readonly
+    }
+    get access(){
+        return this.ast.accessibility
+    }
+    get value(){
+        return this.ast.value ? generate(this.ast.value,{}).code : ''
+    }     
+}
 
 
-
-
-export interface EaClassProps extends EaObjectProps{ 
+export interface IEaClass extends IEaObject{ 
 
 }
 
-export class EaClass extends EaObject<t.ClassDeclaration,EaClassProps>{
+export class EaClass extends EaObject<t.ClassDeclaration,IEaClass> implements IEaClass{
     private _classDescr?:string    
     private _body?:EaStatement
-    private _methods?:FlexIterator<t.ClassMethod,EaFunction>
+    private _methods?:FlexIterator<t.ClassMethod,EaClassMethod>
     get name(){
         return t.isIdentifier(this.ast.id) ? this.ast.id.name : ''
     }
@@ -40,11 +202,11 @@ export class EaClass extends EaObject<t.ClassDeclaration,EaClassProps>{
      */
     get methods(){
         if(!this._methods){
-            this._methods = new FlexIterator<t.ClassMethod,EaFunction>(this.ast.body.body.filter((node:t.Node)=>{
+            this._methods = new FlexIterator<t.ClassMethod,EaClassMethod>(this.ast.body.body.filter((node:t.Node)=>{
                 return t.isClassMethod(node)
             }) as t.ClassMethod[],{
                 transform:(node:t.ClassMethod)=>{
-                    return new EaClasMethod(node)
+                    return new EaClassMethod(node)
                 }
             })
         }

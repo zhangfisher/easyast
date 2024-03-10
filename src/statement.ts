@@ -5,6 +5,8 @@ import { EaVariable } from './variable';
 import { EaObject } from './base';
 
 
+export interface IEaStatement extends EaObject{}
+
 export class EaStatement extends EaObject<t.Program>{
     private _funcIterator?:FlexIterator<t.FunctionDeclaration,EaFunction>
     private _varIterator?:FlexIterator<t.VariableDeclarator,EaVariable,t.VariableDeclaration>
@@ -12,7 +14,7 @@ export class EaStatement extends EaObject<t.Program>{
     get body(){
         return this.ast.body
     }    
-    
+
     /**
      * 遍历所有函数声明
      */

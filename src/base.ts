@@ -1,16 +1,12 @@
 import * as t from "@babel/types"
-import type { EasyAST } from './index';
 import generate from "@babel/generator";
 
-export interface EaObjectProps extends Record<string,any>{
+export interface IEaObject extends Record<string,any>{
 
 }
+ 
 
-export type IdentifierNode = t.Node & {
-    id?: t.Identifier | null;
-}
-
-export class EaObject<AST extends t.Node=t.Node,Props extends EaObjectProps = EaObjectProps>{
+export class EaObject<AST extends t.Node=t.Node,Props extends IEaObject = IEaObject>{
     private _ast?:AST
     private _parentAst?:t.Node
     constructor(node:t.Node | Props,parentNode?:t.Node){
