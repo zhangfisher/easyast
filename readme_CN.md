@@ -61,7 +61,7 @@ const ast = EastAST.parse(code)
 // 
 
 // 遍历所有变量声明
-for(const variable of ast.variables()){
+for(const variable of ast.variables){
     console.log(variable.name)          // 变量名称
     console.log(variable.value)         // 变量值
     console.log(variable.kind)          // 变量类型, var, let, const
@@ -71,7 +71,7 @@ for(const variable of ast.variables()){
 }
 
 // 遍历所有函数
-for(const func of ast.functions()){
+for(const func of ast.functions){
     console.log(func.name)
     console.log(func.body)
     console.log(func.loc)
