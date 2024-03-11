@@ -3,6 +3,7 @@ import { FlexIterator } from './utils';
 import { EaFunction } from './function';
 import { EaVariable } from './variable';
 import { EaObject } from './base';
+import { EaClass } from './classs';
 
 
 export interface IEaStatement extends EaObject{}
@@ -10,6 +11,7 @@ export interface IEaStatement extends EaObject{}
 export class EaStatement extends EaObject<t.Program>{
     private _funcIterator?:FlexIterator<t.FunctionDeclaration,EaFunction>
     private _varIterator?:FlexIterator<t.VariableDeclarator,EaVariable,t.VariableDeclaration>
+    private _classIterator?:FlexIterator<t.ClassDeclaration,EaClass>
 
     get body(){
         return this.ast.body
@@ -48,5 +50,20 @@ export class EaStatement extends EaObject<t.Program>{
             })
         }
         return this._varIterator!  
+    } 
+    /**
+    * 遍历所有类明
+    */
+    get classs(){
+        if(!this._classIterator){
+            this._classIterator = new FlexIterator<t.ClassDeclaration,EaClass>(this.body.filter((node:t.Node)=>{
+                return t.isClassDeclaration(node)
+            }) as t.ClassDeclaration[],{
+                transform:(node:t.ClassDeclaration)=>{
+                    return new EaClass(node)   
+                }
+            })
+        }
+        return this._classIterator!   
     } 
 }

@@ -7,7 +7,6 @@
 
 import * as t from '@babel/types';  
 import { EaObject,IEaObject } from './base';
-import { getAstLiteralValue } from './utils';
 import generate from '@babel/generator';
 
 export interface IEaVariable extends IEaObject{
@@ -48,7 +47,7 @@ export class EaVariable extends EaObject<t.VariableDeclarator,IEaVariable> imple
     } 
     toString(){
         if(!this._varDescr){
-            const node =t.cloneNode(this.ast,false,true)
+            const node =t.cloneNode(this.ast,true,true)
             if(node.init){
                 if(t.isArrowFunctionExpression(node.init) || t.isFunctionExpression(node.init) ){
                     node.init.body = t.blockStatement([])

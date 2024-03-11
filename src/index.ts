@@ -79,6 +79,11 @@ export class EasyAST{
     get variables(){
         return this.body.variables
     }
-
+    /**
+     * 返回获取所有类声明的迭代器
+     */
+    get classs(){
+        return this.body.classs
+    }
 
 }

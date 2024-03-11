@@ -81,16 +81,27 @@ class C extends B{
         super();
         console.log('I am C');
     }
-    print(){
+    print(a,b){
         console.log('I am print');
     }
-    getId(){
+    getId(c){
         console.log('I am getId');
         return '1'
     }
-    *log(){
+    *log(text,...values){
 
     }
     print =()=>{}
 
+}
+
+
+const factory = ()=>{
+
+}
+class D extends factory(){
+    constructor(){
+        super();
+        console.log('I am D');
+    }
 }

@@ -92,7 +92,7 @@ export class EaFunction extends EaObject<t.FunctionDeclaration , EaFunctionProps
     } 
     toString(){
         if(!this._funcDescr){
-            const node = t.cloneNode(this.ast,false,true)
+            const node = t.cloneNode(this.ast,true,true)
             node.body = t.blockStatement([])
             this._funcDescr = generate(node).code
         }

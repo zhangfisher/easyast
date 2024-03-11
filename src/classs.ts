@@ -7,7 +7,7 @@
 
 import * as t from '@babel/types';  
 import { EaObject,IEaObject } from './base';
-import { FlexIterator } from './utils';
+import { FlexIterator, getAstNodeName } from './utils';
 import generate from '@babel/generator';
 import { EaStatement } from './statement'; 
 import { EaArguemnt } from './arguemnt';
@@ -134,7 +134,7 @@ export class EaClassMethod extends EaObject<t.ClassMethod , IEaClassMethod> impl
     }
     toString(){
         if(!this._methodDescr){
-            const node = t.cloneNode(this.ast,false,true)
+            const node = t.cloneNode(this.ast,true,true)
             node.body = t.blockStatement([])
             this._methodDescr = generate(node).code
         }
@@ -183,6 +183,13 @@ export class EaClassProperty extends EaObject<t.ClassProperty , IEaClassProperty
     get value(){
         return this.ast.value ? generate(this.ast.value,{}).code : ''
     }     
+    toString(){
+        if(!this._propertyDescr){
+            const node = t.cloneNode(this.ast,true,true)
+            this._propertyDescr = generate(node).code
+        }
+        return this._propertyDescr!
+    }
 }
 
 
@@ -194,8 +201,16 @@ export class EaClass extends EaObject<t.ClassDeclaration,IEaClass> implements IE
     private _classDescr?:string    
     private _body?:EaStatement
     private _methods?:FlexIterator<t.ClassMethod,EaClassMethod>
+    private _properties?:FlexIterator<t.ClassProperty,EaClassProperty>
+    
     get name(){
         return t.isIdentifier(this.ast.id) ? this.ast.id.name : ''
+    }
+    /**
+     * 返回父类
+     */
+    get super(){
+        return t.isIdentifier(this.ast.superClass) ? getAstNodeName(this.ast.superClass) : (this.ast.superClass && generate(this.ast.superClass).code)
     }
     /**
      * 返回类方法的迭代器
@@ -213,11 +228,20 @@ export class EaClass extends EaObject<t.ClassDeclaration,IEaClass> implements IE
         return this._methods!
     }
     get properties(){
-        return []
+        if(!this._properties){
+            this._properties = new FlexIterator<t.ClassProperty,EaClassProperty>(this.ast.body.body.filter((node:t.Node)=>{
+                return t.isClassProperty(node)
+            }) as t.ClassProperty[],{
+                transform:(node:t.ClassProperty)=>{
+                    return new EaClassProperty(node)
+                }
+            })
+        }
+        return this._properties!
     }
     toString(){
         if(!this._classDescr){
-            const node =t.cloneNode(this.ast,false,true)
+            const node =t.cloneNode(this.ast,true,true)
             node.body.body = []
             this._classDescr = generate(node).code
         }
