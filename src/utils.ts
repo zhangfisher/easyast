@@ -1,3 +1,4 @@
+import generate from '@babel/generator';
 import * as t from '@babel/types';
 
 
@@ -158,3 +159,45 @@ export class FlexIterator<Value=any,Result=Value,Parent=Value> {
 }
  
  
+
+export function getTsTypeAnnotation(node?:t.Node){
+    try{
+        if(!node) return ''
+        const t = generate(node,{}).code
+        return t.replace(/^:\s*/g,'')
+    }catch{
+        return ''
+    }
+    
+    // if(t.isTSNumberKeyword(node.typeAnnotation)){
+    //     return 'number'
+    // }else if(t.isTSStringKeyword(node.typeAnnotation)){
+    //     return 'string'
+    // }else if(t.isTSBooleanKeyword(node.typeAnnotation)){
+    //     return 'boolean'
+    // }else if(t.isTSAnyKeyword(node.typeAnnotation)){
+    //     return 'any'
+    // }else if(t.isTSArrayType(node.typeAnnotation)){
+    //     return getTypescriptTypeAnnotation(node.typeAnnotation.elementType)+'[]'
+    // }else if(t.isTSUnionType(node.typeAnnotation)){
+    //     return node.typeAnnotation.types.map((type)=>getTypescriptTypeAnnotation(type)).join('|')
+    // }else if(t.isTSTypeReference(node.typeAnnotation)){
+    //     return node.typeAnnotation.typeName.name
+    // }else if(t.isTSFunctionType(node.typeAnnotation)){
+    //     return 'Function'
+    // }else if(t.isTSObjectKeyword(node.typeAnnotation)){
+    //     return 'object'
+    // }else if(t.isTSVoidKeyword(node.typeAnnotation)){
+    //     return 'void'
+    // }else if(t.isTSNullKeyword(node.typeAnnotation)){
+    //     return 'null'
+    // }else if(t.isTSUndefinedKeyword(node.typeAnnotation)){
+    //     return 'undefined'
+    // }else if(t.isTSBigIntKeyword(node.typeAnnotation)){
+    //     return 'bigint'
+    // }else if(t.isTSNeverKeyword(node.typeAnnotation)){
+    //     return 'never'
+    // }else if(t.isTSUnknownKeyword(node.typeAnnotation)){
+    //     return 'unknown'
+    // }
+}

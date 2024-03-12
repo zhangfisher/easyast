@@ -22,24 +22,11 @@ import { EaFunction } from "./function";
 import generate from "@babel/generator";
 
 
-export interface IExpression{
+export interface IEaExpression{
 }
 
-export class Expression extends EaObject<t.Expression> implements IExpression{ 
-    /**
-     * 表达式对象
-     * EaFunction
-     * EaClass
-     * 
-     * 
-     */
-    get value(){
-        if(t.isCallExpression(this.ast)){
-            return new EaFunction(this.ast)
-        }else{
-            return generate(this.ast).code
-        }
-    }
+export class EaExpression extends EaObject<t.Expression> implements IEaExpression{ 
+     
 }
 
  

@@ -118,3 +118,10 @@ for(const cls of mod.classs){
     }
 
 }
+
+console.log("   ------statements------")
+
+for(const statement of mod){
+    console.log(statement.toString())
+    console.log("-------")
+}

@@ -1,17 +1,13 @@
-/**
- *
- *  变量 
- *
- *  
- */
-
+import  generate from '@babel/generator';
 import * as t from '@babel/types';  
-import { EaObject,IEaObject } from './base';
-import generate from '@babel/generator';
+import { EaObject,IEaObject } from './base'; 
+import { getTsTypeAnnotation } from './utils';
+
+t.typeAnnotation
 
 export interface IEaVariable extends IEaObject{
     name:string
-    datatype:string
+    typeAnnotation:string
     value:any
     kind:t.VariableDeclaration['kind'] | undefined
 }
@@ -25,12 +21,22 @@ export class EaVariable extends EaObject<t.VariableDeclarator,IEaVariable> imple
      * 变量的数据类型
      * 即typescript类型
      */
-    get datatype(){
-        return ""
+    get typeAnnotation(){
+        const typeAnnotation =  t.isIdentifier(this.ast.id) && this.ast.id.typeAnnotation ? this.ast.id.typeAnnotation : undefined
+        return getTsTypeAnnotation(typeAnnotation)
     }
     get value(){
         if(!this.ast.init) return undefined
-        return generate(this.ast.init,{}).code 
+        const initNode = this.ast.init
+        if(t.isBooleanLiteral(initNode)){
+            return initNode.value
+        }else if(t.isStringLiteral(initNode)){
+            return initNode.value
+        }else if(t.isNumericLiteral(initNode)){
+            return initNode.value
+        }else{
+            return generate(initNode,{compact:true}).code
+        }        
     }
     /**
      * 值类型，针对typescript

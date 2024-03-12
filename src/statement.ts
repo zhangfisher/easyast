@@ -5,6 +5,7 @@ import { EaVariable } from './variable';
 import { EaObject } from './base';
 import { EaClass } from './classs';
 import generate from '@babel/generator';
+import { EaExpression } from './expression';
 
 
 export interface IEaStatement extends EaObject{}
@@ -12,7 +13,7 @@ export interface IEaStatement extends EaObject{}
 export class EaStatement extends EaObject<t.Program>{
     private _functions?:EaFunction[]
     private _variables?:EaVariable[]
-    private _statements?:EaStatement[]
+    private _statements?:EaObject[]
     private _classs?:EaClass[]
 
 
@@ -72,20 +73,16 @@ export class EaStatement extends EaObject<t.Program>{
      */
     get statements(){
         if(!this._statements){
-            this._statements = this.ast.body.filter((node:t.Node)=>{
-                return t.isBlockStatement(node)
-            }).map((node)=>{
-                return new EaStatement(node)                   
-            })
+            this._statements = [...this]
         }
-        return this._statements
+        return this._statements 
     }    
     /**
      * 按顺序遍历所有节点，返回节点对象
      * @returns 
      */
-    [Symbol.iterator](){
-        return new FlexIterator<any,any,any>(this.ast.body,{
+    [Symbol.iterator](): Iterator<EaObject>{
+        return (new FlexIterator<any,any,any>(this.ast.body,{
             transform:(node:t.Node)=>{
                 if(t.isFunctionDeclaration(node)){
                     return new EaFunction(node,this.ast)
@@ -94,12 +91,14 @@ export class EaStatement extends EaObject<t.Program>{
                 }else if(t.isClassDeclaration(node)){
                     return new EaClass(node,this.ast)
                 }else if(t.isExpression(node)){
-                    return new EaStatement(node)
+                    return new EaExpression(node)
                 }else if(t.isBlockStatement(node)){
                     return new EaStatement(node)
+                }else{
+                    return new EaObject(node)
                 }
             }
-        })
+        }))[Symbol.iterator]()
     }
 
 }

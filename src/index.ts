@@ -28,27 +28,31 @@ func.body
  */
 
 import * as parser from "@babel/parser";
-import type {} from "@babel/parser";
 import traverse from "@babel/traverse";
 import * as t from "@babel/types";
 import { EaStatement } from "./statement";
 
 export interface EasyASTOptions{
     typescript: boolean;
-    jsx: boolean;    
-    plugins:any[]    
+    jsx: boolean;        
+    babelParserOptions:parser.ParserOptions
 }
 
 
-export class EasyAST{
+export class EasyAST {
     options: EasyASTOptions;
     private _ast:any
     private body:EaStatement 
     constructor(code: string, options?: EasyASTOptions) {
-        this.options =Object.assign({},options)
+        this.options =Object.assign({
+            typescript:true,
+            babelParserOptions:{
+                plugins:[]
+            }
+        },options)
         this.parse(code); 
         this.body = new EaStatement(this.ast.program,undefined)
-    }
+    } 
     get ast(){
         return this._ast! 
     }
@@ -57,7 +61,12 @@ export class EasyAST{
      * @param code 
      */
     private parse(code:string){
-        this._ast = parser.parse(code)
+        const opts = {...this.options.babelParserOptions}
+        if(!opts.plugins) opts.plugins = []
+        if(this.options.typescript){
+            opts.plugins.push("typescript")
+        }        
+        this._ast = parser.parse(code,opts)
     }
     /**
      * 获取所有函数的迭代器
@@ -79,6 +88,8 @@ export class EasyAST{
     }
     get statements(){
         return this.body.statements
+    } 
+    [Symbol.iterator](){
+        return this.body[Symbol.iterator]()
     }
-
 }
