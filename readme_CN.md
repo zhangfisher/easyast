@@ -14,7 +14,7 @@ yarn add easyast
 ```
 
 
-## 使用
+## 快速入门
 
 样例代码如下：
 
@@ -83,8 +83,48 @@ for(const func of ast.functions){
 // 遍历所有类
 for(const cls of ast.classs()){
     console.log(cls.name)
+    console.log(cls.body)
+    console.log(cls.loc)
+    console.log(cls.code)
+    console.log(cls.toString())
+    console.log(cls.superClass)
+    console.log(cls.statics)
+    for(const prop of cls.properties){
+        console.log(prop.name)
+        console.log(prop.value)
+        console.log(prop.kind)
+        console.log(prop.loc)
+        console.log(prop.code)
+        console.log(prop.toString())
+    }
+    for(const method of cls.methods){
+        console.log(method.name)
+        console.log(method.body)
+        console.log(method.loc)
+        console.log(method.code)
+        console.log(method.toString())
+        console.log(method.params)
+    }
 }
-
-
-
 ```
+
+## 指南
+
+### 创建EasyAST对象
+
+### 变量
+
+### 函数
+
+### 类
+
+### 装饰器
+
+### 模块
+
+
+## API
+
+
+
+

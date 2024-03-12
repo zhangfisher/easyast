@@ -31,21 +31,13 @@ import * as parser from "@babel/parser";
 import type {} from "@babel/parser";
 import traverse from "@babel/traverse";
 import * as t from "@babel/types";
-import { FlexIterator } from "./utils";
-import { EaFunction } from "./function";
 import { EaStatement } from "./statement";
 
 export interface EasyASTOptions{
     typescript: boolean;
     jsx: boolean;    
-    plugins:any[],
-    /**
-     * 获取字面量的值
-     * @param node 
-     */
-    getLitervalValue(node:t.Literal):any
+    plugins:any[]    
 }
-
 
 
 export class EasyAST{
@@ -58,7 +50,7 @@ export class EasyAST{
         this.body = new EaStatement(this.ast.program,undefined)
     }
     get ast(){
-        return this._ast!
+        return this._ast! 
     }
     /**
      * 解析为Ast
@@ -84,6 +76,9 @@ export class EasyAST{
      */
     get classs(){
         return this.body.classs
+    }
+    get statements(){
+        return this.body.statements
     }
 
 }

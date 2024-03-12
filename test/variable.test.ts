@@ -18,7 +18,7 @@ describe("jscode",()=>{
         console.log("------")
         for(const func of code.functions){
             console.log(func.name,'async=',func.async,"generator=",func.generator)
-            for(const arg of func.args){
+            for(const arg of func.arguments){
                 console.log(arg.name ,'=' ,arg.defaultValue)
             }
             console.log("------")

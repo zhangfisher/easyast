@@ -17,7 +17,7 @@ export interface IEaVariable extends IEaObject{
 }
 export class EaVariable extends EaObject<t.VariableDeclarator,IEaVariable> implements IEaVariable{
     [x: string]: any; 
-    private _varDescr?:string           // 变量声明，如果有函数
+    private _declaration?:string            
     get name(){
         return t.isIdentifier(this.ast.id) ? this.ast.id.name : ''
     }
@@ -33,7 +33,7 @@ export class EaVariable extends EaObject<t.VariableDeclarator,IEaVariable> imple
         return generate(this.ast.init,{}).code 
     }
     /**
-     * 值类型
+     * 值类型，针对typescript
      */
     get valueType(){
         if(!this.ast.init) return undefined
@@ -43,10 +43,10 @@ export class EaVariable extends EaObject<t.VariableDeclarator,IEaVariable> imple
      * 变量声明方式：var let const
      */
     get kind(){
-        return this.parent && (this.parent as t.VariableDeclaration).kind
+        return this.contextAst && (this.contextAst as t.VariableDeclaration).kind
     } 
     toString(){
-        if(!this._varDescr){
+        if(!this._declaration){
             const node =t.cloneNode(this.ast,true,true)
             if(node.init){
                 if(t.isArrowFunctionExpression(node.init) || t.isFunctionExpression(node.init) ){
@@ -55,9 +55,9 @@ export class EaVariable extends EaObject<t.VariableDeclarator,IEaVariable> imple
                     // 模板字符串有可能很大，不得于呈现
                 }
             }
-            this._varDescr = generate(node).code
+            this._declaration = generate(node).code
         }
-        return this._varDescr!
+        return this._declaration!
     }
 }
 

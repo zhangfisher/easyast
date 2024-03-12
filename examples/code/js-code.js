@@ -5,11 +5,43 @@
 let v0
 const v1 = require('./a');
 const v2 = 1
-const v3 = 2
+const v3 = v2+1
+const v4 = v3
 
 let vx = 1,vy=2,vz=3;
+for(let i=0;i<10;i++){
+    console.log(i);
+}
+do{
+    console.log('do while');
+}
+while(true){
+    console.log('while');
+}
 1+1
 1+2*2+v2+v3*vy
+
+const expr1 = [1,2,{},true,()=>{}]
+const expr2 = {a:1,b:2,c:()=>{}}
+const expr3 = ()=>{}
+const expr4 = function(){}
+const expr5 = v0 ? 1 : ()=>v2
+const expr6 = new Date()
+const expr7 = new RegExp()
+const expr8 = /^voerkai18n/
+
+
+const user = {
+    name:"zhang",
+    add(){
+
+    }
+} 
+{
+    let a=1
+    a+1
+}
+
 const t1=`i am template literal ${v1}  ${v2}`
 const t2=String.raw`i am string.raw literal ${v1}  ${v2}`
 
@@ -93,6 +125,12 @@ class C extends B{
     }
     print =()=>{}
 
+    get sum(){
+        return this.x+this.y
+    }
+    set sum(value){
+        this.x = value
+    }
 }
 
 

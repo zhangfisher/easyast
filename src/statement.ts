@@ -4,40 +4,43 @@ import { EaFunction } from './function';
 import { EaVariable } from './variable';
 import { EaObject } from './base';
 import { EaClass } from './classs';
+import generate from '@babel/generator';
 
 
 export interface IEaStatement extends EaObject{}
-
+ 
 export class EaStatement extends EaObject<t.Program>{
-    private _funcIterator?:FlexIterator<t.FunctionDeclaration,EaFunction>
-    private _varIterator?:FlexIterator<t.VariableDeclarator,EaVariable,t.VariableDeclaration>
-    private _classIterator?:FlexIterator<t.ClassDeclaration,EaClass>
+    private _functions?:EaFunction[]
+    private _variables?:EaVariable[]
+    private _statements?:EaStatement[]
+    private _classs?:EaClass[]
 
+
+    /**
+     * 获取代码
+     */
     get body(){
-        return this.ast.body
+        return 
     }    
-
     /**
      * 遍历所有函数声明
      */
     get functions(){
-        if(!this._funcIterator){
-            this._funcIterator = new FlexIterator<t.FunctionDeclaration,EaFunction>(this.body.filter((node:t.Node)=>{
+        if(!this._functions){
+            this._functions = this.ast.body.filter((node:t.Node)=>{
                 return t.isFunctionDeclaration(node)
-            }) as t.FunctionDeclaration[],{
-                transform:(node:t.FunctionDeclaration)=>{
-                    return new EaFunction(node)   
-                }
+            }).map((node)=>{
+                return new EaFunction(node)                   
             })
         }
-        return this._funcIterator!  
+        return this._functions! 
     } 
     /**
     * 遍历所有变量声明
     */
     get variables(){
-        if(!this._varIterator){
-            this._varIterator = new FlexIterator<t.VariableDeclarator,EaVariable,t.VariableDeclaration>(this.body.filter((node: t.Node) => {
+        if(!this._variables){
+            this._variables = [...new FlexIterator<t.VariableDeclarator,EaVariable,t.VariableDeclaration>(this.ast.body.filter((node: t.Node) => {
                     return t.isVariableDeclaration(node);
                 }) as unknown as t.VariableDeclarator[],{
                 pick:(item:t.VariableDeclaration | t.VariableDeclarator)=>{
@@ -47,23 +50,56 @@ export class EaStatement extends EaObject<t.Program>{
                     return new EaVariable(node,parent)
                 },
                 recursion:true
-            })
+            })]
         }
-        return this._varIterator!  
+        return this._variables!
     } 
     /**
     * 遍历所有类明
     */
     get classs(){
-        if(!this._classIterator){
-            this._classIterator = new FlexIterator<t.ClassDeclaration,EaClass>(this.body.filter((node:t.Node)=>{
+        if(!this._classs){
+            this._classs = this.ast.body.filter((node:t.Node)=>{
                 return t.isClassDeclaration(node)
-            }) as t.ClassDeclaration[],{
-                transform:(node:t.ClassDeclaration)=>{
-                    return new EaClass(node)   
-                }
+            }).map((node)=>{
+                    return new EaClass(node)                   
             })
         }
-        return this._classIterator!   
+        return this._classs!   
     } 
+    /**
+     * 遍历所有代码块
+     */
+    get statements(){
+        if(!this._statements){
+            this._statements = this.ast.body.filter((node:t.Node)=>{
+                return t.isBlockStatement(node)
+            }).map((node)=>{
+                return new EaStatement(node)                   
+            })
+        }
+        return this._statements
+    }    
+    /**
+     * 按顺序遍历所有节点，返回节点对象
+     * @returns 
+     */
+    [Symbol.iterator](){
+        return new FlexIterator<any,any,any>(this.ast.body,{
+            transform:(node:t.Node)=>{
+                if(t.isFunctionDeclaration(node)){
+                    return new EaFunction(node,this.ast)
+                }else if(t.isVariableDeclaration(node)){
+                    return new EaVariable(node,this.ast)
+                }else if(t.isClassDeclaration(node)){
+                    return new EaClass(node,this.ast)
+                }else if(t.isExpression(node)){
+                    return new EaStatement(node)
+                }else if(t.isBlockStatement(node)){
+                    return new EaStatement(node)
+                }
+            }
+        })
+    }
+
 }

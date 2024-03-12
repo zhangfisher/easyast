@@ -18,6 +18,21 @@
             "cwd": "${workspaceRoot}/examples",
             "protocol": "inspector",
             "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Run QuickStart",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "quick-start.ts"
+            ],
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "cwd": "${workspaceRoot}/examples",
+            "protocol": "inspector",
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }

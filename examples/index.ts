@@ -22,7 +22,7 @@ for(const func of code.functions){
 console.log("------ classs ------")
 for(const cls of code.classs){
     console.log(cls.toString())
-    console.log("parent class:",cls.super)
+    console.log("parent class:",cls.superClass)
     console.log("methods:")
     for(const method of cls.methods){
         console.log("   ",method.toString())

@@ -30,9 +30,9 @@ export interface EaFunctionProps extends IEaObject{
 
  
 export class EaFunction extends EaObject<t.FunctionDeclaration , EaFunctionProps>{
-    private _args?:FlexIterator<t.Identifier | t.RestElement | t.Pattern,EaArguemnt>      
+    private _arguments?:EaArguemnt[]      
     private _body?:EaStatement
-    private _funcDescr?:string          // 函数描述，不包含函数体
+    private _declaration?:string          
 
     protected createAstNode(props:EaFunctionProps){
         //return t.functionDeclaration(t.identifier(props.name||""),[],t.blockStatement([]),props.async,props.generator,props.arrow)
@@ -62,16 +62,13 @@ export class EaFunction extends EaObject<t.FunctionDeclaration , EaFunctionProps
         return false
     }
     get body(){
-        if(!this._body){
-            this._body = new EaStatement(this.ast.body,undefined)
-        }
-        return this._body
+        return this._body || (this._body = new EaStatement(this.ast.body,undefined))
     }
     /**
      * 函数返回值
      */
     get returns(){
-        const returnNode = this.body.body.filter((node:t.Node)=>{
+        const returnNode = this.body.ast.body.filter((node:t.Node)=>{
             return t.isReturnStatement(node)
         })
         if(returnNode.length==0) return undefined
@@ -80,23 +77,16 @@ export class EaFunction extends EaObject<t.FunctionDeclaration , EaFunctionProps
     /**
      * 函数参数
      */
-    get args(){
-        if(!this._args){
-            this._args = new FlexIterator<t.Identifier | t.RestElement | t.Pattern,EaArguemnt>(this.ast.params,{
-                transform:(param)=>{
-                    return new EaArguemnt(param)
-                }
-            })
-        }
-        return this._args!
+    get arguments(){
+        return (this._arguments || (this._arguments = this.ast.params.map((param)=>new EaArguemnt(param))))!
     } 
     toString(){
-        if(!this._funcDescr){
+        if(!this._declaration){
             const node = t.cloneNode(this.ast,true,true)
             node.body = t.blockStatement([])
-            this._funcDescr = generate(node).code
+            this._declaration = generate(node).code
         }
-        return this._funcDescr!
+        return this._declaration!
     }    
 }
 
