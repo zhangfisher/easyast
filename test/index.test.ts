@@ -506,10 +506,20 @@ describe("Classs",()=>{
         expect(code.imports[5].specifiers[1].name).toBe("n")
         expect(code.imports[5].specifiers[1].kind).toBe("type")
         expect(code.imports[5].source).toBe("f-module")
-
-        
-
-
+    })
+    test("读取模块的导出信息",()=>{
+        const code = new EasyAST(`
+            const a = 1
+            let b = 2
+            export { a, b }
+            export const x=true
+            export class C{}
+            export function f(){}
+            export default function(){}
+            export = 1
+            export * from './anotherModule';
+        `)
+        expect(code).toBe(6)
 
     })
 })

@@ -1,6 +1,11 @@
 import generate, { GeneratorOptions } from '@babel/generator';
 import * as t from '@babel/types';
+import { EaObject } from './base';
 
+
+export function getEaObject(node:t.Node){
+    return new EaObject(node)
+}
 
 /**
  * 获取节点名称
