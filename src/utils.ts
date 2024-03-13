@@ -1,4 +1,4 @@
-import generate from '@babel/generator';
+import generate, { GeneratorOptions } from '@babel/generator';
 import * as t from '@babel/types';
 
 
@@ -27,7 +27,16 @@ export function getAstNodeName(node: t.Node): string {
     return ''
 }
 
+/**
+ * 获取节点的代码
+ * 
+ * @param node 
+ * @returns 
+ */
 
+export function getAstNodeCode(node: t.Node,options?:GeneratorOptions): string {
+    return generate(node,Object.assign({ compact: true },options)).code.trim();
+}
 /**
  * 获取一个字面量的值
  *  
@@ -37,15 +46,21 @@ export function getAstNodeName(node: t.Node): string {
  * @returns 
  */
 export function getAstLiteralValue(node: t.Literal): any {
-    if (t.isNullLiteral(node)) {
-        return null
-    }else if(t.isRegExpLiteral(node)){
-        return new RegExp(node.pattern,node.flags)
-    }else if(t.isTemplateLiteral(node)){
-        return node.quasis.map((item)=>item.value.raw).join('')
-    }else{
-        return node.value
-    }      
+    try{
+        if (t.isNullLiteral(node)) {
+            return null
+        }else if(t.isRegExpLiteral(node)){
+            return (new RegExp(node.pattern,node.flags)).toString()
+        }else if('value' in node){
+            return node.value
+        }else if(t.isTemplateLiteral(node)){
+            return node.quasis.map((item)=>item.value.raw).join('')
+        }else{ 
+            return getAstNodeCode(node)
+        }    
+    }catch{
+        return getAstNodeCode(node)
+    }    
 }
 /**
  * 
@@ -77,7 +92,6 @@ export type FlexIteratorOptions<Value=any,Result=Value,Parent=any> = {
     transform:(value:Value,parent?:Parent)=>Result
     // 当true时如果transform也返回一个迭代对象时，递归遍历所有可迭代对象
     recursion?:boolean
-
 }
  
 /**
@@ -159,45 +173,28 @@ export class FlexIterator<Value=any,Result=Value,Parent=Value> {
 }
  
  
-
-export function getTsTypeAnnotation(node?:t.Node){
+/**
+ * 读取节点的类型注解
+ * @param node 
+ * @returns 
+ */
+export function getTypeAnnotation(node?:t.Node){
+    if(!node) return ''
     try{
-        if(!node) return ''
-        const t = generate(node,{}).code
-        return t.replace(/^:\s*/g,'')
+        if('typeAnnotation' in node){
+            const t = getAstNodeCode(node.typeAnnotation!,{compact:false})
+            return t.replace(/^:\s*/g,'').trim()
+        }else{
+            return ''
+        }        
     }catch{
         return ''
-    }
-    
-    // if(t.isTSNumberKeyword(node.typeAnnotation)){
-    //     return 'number'
-    // }else if(t.isTSStringKeyword(node.typeAnnotation)){
-    //     return 'string'
-    // }else if(t.isTSBooleanKeyword(node.typeAnnotation)){
-    //     return 'boolean'
-    // }else if(t.isTSAnyKeyword(node.typeAnnotation)){
-    //     return 'any'
-    // }else if(t.isTSArrayType(node.typeAnnotation)){
-    //     return getTypescriptTypeAnnotation(node.typeAnnotation.elementType)+'[]'
-    // }else if(t.isTSUnionType(node.typeAnnotation)){
-    //     return node.typeAnnotation.types.map((type)=>getTypescriptTypeAnnotation(type)).join('|')
-    // }else if(t.isTSTypeReference(node.typeAnnotation)){
-    //     return node.typeAnnotation.typeName.name
-    // }else if(t.isTSFunctionType(node.typeAnnotation)){
-    //     return 'Function'
-    // }else if(t.isTSObjectKeyword(node.typeAnnotation)){
-    //     return 'object'
-    // }else if(t.isTSVoidKeyword(node.typeAnnotation)){
-    //     return 'void'
-    // }else if(t.isTSNullKeyword(node.typeAnnotation)){
-    //     return 'null'
-    // }else if(t.isTSUndefinedKeyword(node.typeAnnotation)){
-    //     return 'undefined'
-    // }else if(t.isTSBigIntKeyword(node.typeAnnotation)){
-    //     return 'bigint'
-    // }else if(t.isTSNeverKeyword(node.typeAnnotation)){
-    //     return 'never'
-    // }else if(t.isTSUnknownKeyword(node.typeAnnotation)){
-    //     return 'unknown'
-    // }
+    } 
+}
+
+
+
+export function isEsmModule(code:string){
+    const esmPattern = /import\s+.*\s+from\s+['"].*['"]|export\s+.*|export\s+{\s*.*\s*}\s+from\s+['"].*['"]/;
+    return esmPattern.test(code); 
 }

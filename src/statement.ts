@@ -68,6 +68,9 @@ export class EaStatement extends EaObject<t.Program>{
         }
         return this._classs!   
     } 
+    get sourceType(){
+        return this.ast.sourceType
+    }
     /**
      * 遍历所有代码块
      */
@@ -99,6 +102,10 @@ export class EaStatement extends EaObject<t.Program>{
                 }
             }
         }))[Symbol.iterator]()
+    }
+
+    get imports(){
+        return {}
     }
 
 }

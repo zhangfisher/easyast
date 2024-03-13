@@ -1,11 +1,11 @@
 import  generate from '@babel/generator';
 import * as t from '@babel/types';  
-import { EaObject,IEaObject } from './base'; 
-import { getTsTypeAnnotation } from './utils';
+import { EaObject,IEaObjectProps } from './base'; 
+import { getTypeAnnotation } from './utils';
 
 t.typeAnnotation
 
-export interface IEaVariable extends IEaObject{
+export interface IEaVariable extends IEaObjectProps{
     name:string
     typeAnnotation:string
     value:any
@@ -23,7 +23,7 @@ export class EaVariable extends EaObject<t.VariableDeclarator,IEaVariable> imple
      */
     get typeAnnotation(){
         const typeAnnotation =  t.isIdentifier(this.ast.id) && this.ast.id.typeAnnotation ? this.ast.id.typeAnnotation : undefined
-        return getTsTypeAnnotation(typeAnnotation)
+        return getTypeAnnotation(typeAnnotation)
     }
     get value(){
         if(!this.ast.init) return undefined

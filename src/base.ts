@@ -1,14 +1,14 @@
 import * as t from "@babel/types"
 import generate from "@babel/generator";
-import traverse, { Scope } from "@babel/traverse";
-import { FlexIterator } from "./utils";
+import traverse, { Scope } from "@babel/traverse"; 
+import { getTypeAnnotation } from "./utils";
 
-export interface IEaObject extends Record<string,any>{
+export interface IEaObjectProps extends Record<string,any>{
 
 }
  
 
-export class EaObject<AST extends t.Node=t.Node,Props extends IEaObject = IEaObject>{
+export class EaObject<AST extends t.Node=t.Node,Props extends IEaObjectProps = IEaObjectProps>{
     private _ast?:AST
     private _contextAst?:t.Node
     /**
@@ -36,7 +36,7 @@ export class EaObject<AST extends t.Node=t.Node,Props extends IEaObject = IEaObj
             retainLines:false,
             compact:true
         }).code
-    }
+    }    
     /**
      * 获取当前节点的上下文
      */

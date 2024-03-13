@@ -6,14 +6,15 @@
  */
 
 import * as t from '@babel/types';  
-import { EaObject,IEaObject } from './base';
-import { getAstNodeName } from './utils';
+import { EaObject,IEaObjectProps } from './base';
+import { getAstNodeCode, getAstNodeName, getTypeAnnotation } from './utils';
 import generate from '@babel/generator';
 import { EaStatement } from './statement'; 
 import { EaArguemnt } from './arguemnt';
+import { EaFunctionReturns } from './function';
 
 
-export type IEaClassMethod = IEaObject & Pick<t.ClassMethod,
+export type IEaClassMethod = IEaObjectProps & Pick<t.ClassMethod,
     'abstract'
     | 'computed'
     | 'static'
@@ -33,6 +34,7 @@ export class EaClassMethod extends EaObject<t.ClassMethod , IEaClassMethod> impl
     private _arguments?:EaArguemnt[]      
     private _body?:EaStatement
     private _declaration?:string     
+    private _returns?:EaFunctionReturns      
 
     protected createAstNode(props:IEaClassMethod){
         //return t.functionDeclaration(t.identifier(props.name||""),[],t.blockStatement([]),props.async,props.generator,props.arrow)
@@ -103,6 +105,11 @@ export class EaClassMethod extends EaObject<t.ClassMethod , IEaClassMethod> impl
     get arrow(){
         return false
     }
+    get accessibility(){
+        return this.ast.accessibility || 'public'
+    }
+         
+
     get body(){
         if(!this._body){
             this._body = new EaStatement(this.ast.body,undefined)
@@ -110,14 +117,20 @@ export class EaClassMethod extends EaObject<t.ClassMethod , IEaClassMethod> impl
         return this._body
     }
     /**
-     * 函数返回值
+     * 方法返回值
      */
     get returns(){
-        const returnNode = this.body.ast.body.filter((node:t.Node)=>{
-            return t.isReturnStatement(node)
-        })
-        if(returnNode.length==0) return undefined
-        return generate(returnNode[0],{compact:true}).code.substring(6)
+        if(!this._returns){
+            const returnNode = this.body.ast.body.filter((node:t.Node)=>{
+                return t.isReturnStatement(node)
+            }) as t.ReturnStatement[]
+            if(returnNode.length==0){
+                this._returns = new EaFunctionReturns(t.returnStatement(),this.ast.returnType)
+            }else{
+                this._returns = new EaFunctionReturns(returnNode[0],this.ast.returnType)
+            }            
+        }
+        return this._returns!    
     }
     /**
      * 函数参数
@@ -140,15 +153,19 @@ export class EaClassMethod extends EaObject<t.ClassMethod , IEaClassMethod> impl
     }
 }
  
-class EaClassGetter extends EaClassMethod{
-
+export class EaClassGetter extends EaClassMethod{
+    get typeAnnotation(){
+        return super.returns.typeAnnotation
+    }
 }
-class EaClassSetter extends EaClassMethod{
-    
+export class EaClassSetter extends EaClassMethod{    
+    get typeAnnotation(){
+        return  super.arguments.length>0 ? super.arguments[0].typeAnnotation : 'any'
+    }
 }
 
 
-export type IEaClassProperty = IEaObject & Pick<t.ClassProperty,
+export type IEaClassProperty = IEaObjectProps & Pick<t.ClassProperty,
     'abstract'
     | 'computed'  
     | 'abstract' 
@@ -156,8 +173,7 @@ export type IEaClassProperty = IEaObject & Pick<t.ClassProperty,
     | 'readonly' 
     | 'decorators'    
 > & {
-    access: t.ClassProperty['accessibility']
-    value:string
+    accessibility: t.ClassProperty['accessibility'] 
 }
 
 
@@ -179,25 +195,41 @@ export class EaClassProperty extends EaObject<t.ClassProperty , IEaClassProperty
         return this.ast.optional
     }
     get readonly(){
-        return this.ast.readonly
+        return this.ast.readonly==undefined ? false : this.ast.readonly
     }
-    get access(){
-        return this.ast.accessibility
+    get accessibility(){
+        return this.ast.accessibility || 'public'
+    }
+    get static(){
+        return this.ast.static
+    }
+    get typeAnnotation(){
+        return getTypeAnnotation(this.ast)
     }
     get value(){
-        return this.ast.value ? generate(this.ast.value,{}).code : ''
-    }     
+        if(!this.ast.value) return undefined
+        const initNode = this.ast.value
+        if(t.isBooleanLiteral(initNode)){
+            return initNode.value
+        }else if(t.isStringLiteral(initNode)){
+            return initNode.value
+        }else if(t.isNumericLiteral(initNode)){
+            return initNode.value
+        }else{
+            return getAstNodeCode(initNode)
+        }   
+    } 
     toString(){
         if(!this._declaration){
             const node = t.cloneNode(this.ast,true,true)
-            this._declaration = generate(node).code
+            this._declaration = getAstNodeCode(node)
         }
         return this._declaration!
     }
 }
 
 
-export interface IEaClass extends IEaObject{ 
+export interface IEaClass extends IEaObjectProps{ 
 
 }
 
@@ -219,7 +251,9 @@ export class EaClass extends EaObject<t.ClassDeclaration,IEaClass> implements IE
      * 返回父类
      */
     get superClass(){
-        return t.isIdentifier(this.ast.superClass) ? getAstNodeName(this.ast.superClass) : (this.ast.superClass && generate(this.ast.superClass).code)
+        return t.isIdentifier(this.ast.superClass) ? getAstNodeName(this.ast.superClass) : (
+            this.ast.superClass==null ? 'undefined' : generate(this.ast.superClass).code
+        )
     }
     /**
      * 返回类方法的迭代器
@@ -227,10 +261,17 @@ export class EaClass extends EaObject<t.ClassDeclaration,IEaClass> implements IE
     get methods(){
         if(!this._methods){
             this._methods = this.ast.body.body.filter((node:t.Node)=>{ 
-                return t.isClassMethod(node) &&  node.kind=='method'
+                return t.isClassMethod(node) && ["constructor","method"].includes(node.kind)
             }).map((node)=>new EaClassMethod(node)) as EaClassMethod[]
         }
         return this._methods!
+    }
+    /**
+     * 返回构造函数
+     */
+    getConstructor(){
+        if(this.methods.length==0) return undefined
+        return this.methods.find((method)=>method.kind=='constructor')
     }
     get properties(){
         if(!this._properties){
