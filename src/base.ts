@@ -10,7 +10,7 @@ export interface IEaObjectProps extends Record<string,any>{
 
 export class EaObject<AST extends t.Node=t.Node,Props extends IEaObjectProps = IEaObjectProps>{
     private _ast?:AST
-    private _contextAst?:t.Node
+    private _parentAst?:t.Node
     /**
      * 
      * @param node      
@@ -24,11 +24,11 @@ export class EaObject<AST extends t.Node=t.Node,Props extends IEaObjectProps = I
         }else{
             throw new Error("node must be AstNode or Object")        
         }
-        this._contextAst = parentNode
+        this._parentAst = parentNode
     }
     get type(){ return this._ast!.type}
     get ast(){return this._ast!}
-    get contextAst(){ return this._contextAst }    
+    get parentAst(){ return this._parentAst }    
     get loc(){return this.ast.loc}
     get nodeType(){ return this.ast.type }
     get code(){

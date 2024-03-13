@@ -102,10 +102,5 @@ export class EaStatement extends EaObject<t.Program>{
                 }
             }
         }))[Symbol.iterator]()
-    }
-
-    get imports(){
-        return {}
-    }
-
+    } 
 }

@@ -33,6 +33,7 @@ import * as t from "@babel/types";
 import { EaStatement } from "./statement";
 import { isEsmModule } from "./utils";
 import { EaImport } from "./imports";
+import { ParseResult } from "@babel/parser";
 
 export interface EasyASTOptions{
     typescript: boolean;
@@ -43,7 +44,7 @@ export interface EasyASTOptions{
 
 export class EasyAST {
     options: EasyASTOptions;
-    private _ast:any    
+    private _ast?:ParseResult<t.File>    
     private _babelParserOptions:parser.ParserOptions={
         plugins:[]
     }
@@ -60,7 +61,7 @@ export class EasyAST {
         return this._ast! 
     }    
     get sourceType(){
-        return this._ast.program.sourceType
+        return this._ast?.program.sourceType
     }
     private _buildBabelParserOptions(code:string){
         const {sourceType,typescript,jsx} = this.options        
@@ -106,11 +107,12 @@ export class EasyAST {
     } 
     get imports():EaImport[]{
         if(!this._imports){
-            this._imports = this.ast.body.filter((node:t.Node)=>{
-                return t.isImportDeclaration(node)
-            }).map((node:t.ImportDeclaration)=>{
-                return new EaImport(node)                   
-            })
+            this._imports = this.ast.program.body.filter((node:t.Node)=>{
+                    return t.isImportDeclaration(node)
+                }).map((node)=>{
+                    return new EaImport(node)                   
+                })
+            
         }
         return this._imports!
     }

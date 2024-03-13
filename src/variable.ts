@@ -49,7 +49,7 @@ export class EaVariable extends EaObject<t.VariableDeclarator,IEaVariable> imple
      * 变量声明方式：var let const
      */
     get kind(){
-        return this.contextAst && (this.contextAst as t.VariableDeclaration).kind
+        return this.parentAst && (this.parentAst as t.VariableDeclaration).kind
     } 
     toString(){
         if(!this._declaration){
