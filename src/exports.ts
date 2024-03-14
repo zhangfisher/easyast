@@ -2,12 +2,12 @@
 
 
 easyast.exports = EaExport[]
-
-
 EaExport.declaration 
 EaExport.specifiers
 EaExport.source 
- */
+
+
+*/
 
 import generate from "@babel/generator"
 import { EaObject } from "./base"
@@ -34,6 +34,10 @@ export class EaExportSpecifier  extends EaObject<t.ExportSpecifier>{
     }
 }
 
+
+/**
+ * 导出可以是常量，对象，类，函数等
+ */
 export class EaExport extends EaObject<t.ExportDeclaration>{
     private _specifiers?:EaExportSpecifier[]
 
@@ -45,6 +49,9 @@ export class EaExport extends EaObject<t.ExportDeclaration>{
         }
         return this._specifiers
     }
+    /**
+     * 当使用export {} from "x=module"时，source=module
+     */
     get source(){
         return this.ast.source.value
     } 

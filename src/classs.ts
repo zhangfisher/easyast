@@ -1,3 +1,4 @@
+import { EaClassProperty } from './classs';
 /**
  *
  *  变量 
@@ -30,7 +31,7 @@ export type IEaClassMethod = IEaObjectProps & Pick<t.ClassMethod,
 }
 
 
-export class EaClassMethod extends EaObject<t.ClassMethod , IEaClassMethod> implements IEaClassMethod{ 
+export class EaClassMethod extends EaObject<t.ClassMethod,IEaClassMethod> implements IEaClassMethod{ 
     private _arguments?:EaArguemnt[]      
     private _body?:EaStatement
     private _declaration?:string     
@@ -177,11 +178,9 @@ export type IEaClassProperty = IEaObjectProps & Pick<t.ClassProperty,
 }
 
 
-export class EaClassProperty extends EaObject<t.ClassProperty , IEaClassProperty> implements IEaClassProperty{
+export class EaClassProperty extends EaObject<t.ClassProperty, IEaClassProperty> implements IEaClassProperty{
     private _declaration?:string          
-    protected createAstNode(props:IEaClassProperty){
-        //return t.functionDeclaration(t.identifier(props.name||""),[],t.blockStatement([]),props.async,props.generator,props.arrow)
-    }
+  
     get name(){
         return t.isIdentifier(this.ast.key) ? this.ast.key.name : ''
     }
@@ -260,9 +259,9 @@ export class EaClass extends EaObject<t.ClassDeclaration,IEaClass> implements IE
      */
     get methods(){
         if(!this._methods){
-            this._methods = this.ast.body.body.filter((node:t.Node)=>{ 
+            this._methods = (this.ast.body.body.filter((node:t.Node)=>{ 
                 return t.isClassMethod(node) && ["constructor","method"].includes(node.kind)
-            }).map((node)=>new EaClassMethod(node)) as EaClassMethod[]
+            }) as t.ClassMethod[]).map((node)=>new EaClassMethod(node)) as EaClassMethod[]
         }
         return this._methods!
     }
@@ -275,26 +274,26 @@ export class EaClass extends EaObject<t.ClassDeclaration,IEaClass> implements IE
     }
     get properties(){
         if(!this._properties){
-            this._properties = this.ast.body.body.filter((node:t.Node)=>{
+            this._properties = (this.ast.body.body.filter((node:t.Node)=>{
                 return t.isClassProperty(node)
-            }).map(node=>new EaClassProperty(node)) as EaClassProperty[]
+            }) as t.ClassProperty[]).map(node=>new EaClassProperty(node)) as EaClassProperty[]
         }
         return this._properties!
     }
     get getters(){
         if(!this._getters){
-            this._getters = this.ast.body.body.filter((node:t.Node)=>{
+            this._getters = (this.ast.body.body.filter((node:t.Node)=>{
                 return t.isClassMethod(node) && node.kind=='get'
-            }).map(node=>new EaClassGetter(node)) as EaClassGetter[]
+            }) as t.ClassMethod[]).map(node=>new EaClassGetter(node)) as EaClassGetter[]
         }
         return this._getters!
     
     }
     get setters(){
         if(!this._setters){
-            this._setters = this.ast.body.body.filter((node:t.Node)=>{
+            this._setters = (this.ast.body.body.filter((node:t.Node)=>{
                 return t.isClassMethod(node) && node.kind=='set'
-            }).map(node=>new EaClassSetter(node)) as EaClassSetter[]
+            }) as t.ClassMethod[]).map(node=>new EaClassSetter(node)) as EaClassSetter[]
         }
         return this._setters!
     

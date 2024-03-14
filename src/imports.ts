@@ -2,7 +2,13 @@ import generate from "@babel/generator"
 import { EaObject } from "./base"
 import * as t from "@babel/types"
 
-export class EaImportSpecifier  extends EaObject<t.ImportSpecifier>{
+export type ImportSpecifier =t.ImportSpecifier | t.ImportDefaultSpecifier | t.ImportNamespaceSpecifier  
+ 
+
+export class EaImport extends EaObject<ImportSpecifier,t.ImportDeclaration>{ 
+    get source(){
+        return this.ast.source.value
+    } 
     get kind(){
         const pKind =this.parentAst && t.isImportDeclaration(this.parentAst) ?  this.parentAst.importKind : undefined
         return pKind!=='value' ? pKind : this.ast.importKind
@@ -23,25 +29,17 @@ export class EaImportSpecifier  extends EaObject<t.ImportSpecifier>{
     }
 }
 
-export class EaImport extends EaObject<t.ImportDeclaration>{
-    private _specifiers?:EaImportSpecifier[]
 
-    get specifiers(){
-        if(!this._specifiers){
-            this._specifiers = this.ast.specifiers.map((node)=>{
-                return new EaImportSpecifier(node,this.ast)
-            })
-        }
-        return this._specifiers
-    }
-    get source(){
-        return this.ast.source.value
-    } 
-    /**
-     * "type" | "typeof" | "value" 
-     */
-    get kind(){
-        return this.ast.importKind
-    }
+export function parseImports(ast:t.Program){
+    return (ast.body.filter((node:t.Node)=>{
+        return t.isImportDeclaration(node)
+    }) as t.ImportDeclaration[]).reduce<[ImportSpecifier,t.ImportDeclaration][]>((prev,importDeclaration:t.ImportDeclaration)=>{
+        importDeclaration.specifiers.forEach((specifier)=>{
+            prev.push([specifier,importDeclaration])
+        })
+        return prev
+    },[]).map(([specifier,importDeclaration])=>{
+        return new EaImport(specifier,importDeclaration)
+    })
 
 }

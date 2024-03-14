@@ -19,19 +19,35 @@ export class EaStatement extends EaObject<t.Program>{
 
     /**
      * 获取代码
+     * 
+     * 
+     * 
      */
     get body(){
         return 
     }    
     /**
      * 遍历所有函数声明
+     * 
+     * 
+     * 
      */
     get functions(){
         if(!this._functions){
             this._functions = this.ast.body.filter((node:t.Node)=>{
-                return t.isFunctionDeclaration(node)
+                return t.isFunctionDeclaration(node) 
+                    || t.isFunctionExpression(node) 
+                    || t.isArrowFunctionExpression(node) 
+                    || t.isExportDefaultDeclaration(node)
+                    || t.isExportNamedDeclaration(node)                    
             }).map((node)=>{
-                return new EaFunction(node)                   
+                if(t.isExportDefaultDeclaration(node)){
+                    return new EaFunction(node.declaration as t.FunctionDeclaration) 
+                }else if(t.isExportNamedDeclaration(node)){
+                    return new EaFunction(node.declaration as t.FunctionDeclaration)
+                }else{
+                    return new EaFunction(node,this.ast)                   
+                }                
             })
         }
         return this._functions! 

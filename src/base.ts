@@ -8,19 +8,19 @@ export interface IEaObjectProps extends Record<string,any>{
 }
  
 
-export class EaObject<AST extends t.Node=t.Node,Props extends IEaObjectProps = IEaObjectProps>{
-    private _ast?:AST
-    private _parentAst?:t.Node
+export class EaObject<Node extends t.Node=t.Node,Props extends IEaObjectProps = IEaObjectProps,ParentNode extends t.Node= t.Node>{
+    private _ast?:Node
+    private _parentAst?:ParentNode
     /**
      * 
      * @param node      
      * @param parentNode  指定的是节点的上下文AST节点，用来确定节点所在的位置，如变量声明的上下文指的是所在的函数，函数是所在的父函数
      */
-    constructor(node:t.Node | Props,parentNode?:t.Node){
+    constructor(node:Node | Props,parentNode?:ParentNode){
         if(t.isNode(node)){
-            this._ast = node as AST
+            this._ast = node as Node
         }else if(typeof(node)=='object'){
-            this._ast = this.createAstNode(node) as unknown as AST
+            this._ast = this.createAstNode(node as Props) as unknown as Node
         }else{
             throw new Error("node must be AstNode or Object")        
         }

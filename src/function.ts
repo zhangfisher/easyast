@@ -53,7 +53,7 @@ export class EaFunctionReturns extends EaObject<t.ReturnStatement>{
     }
 }
  
-export class EaFunction extends EaObject<t.FunctionDeclaration , EaFunctionProps>{
+export class EaFunction extends EaObject<t.FunctionDeclaration,t.Node, EaFunctionProps>{
     private _arguments?:EaArguemnt[]      
     private _body?:EaStatement
     private _declaration?:string    
