@@ -4,7 +4,6 @@ import { EaFunction } from './function';
 import { EaVariable } from './variable';
 import { EaObject } from './base';
 import { EaClass } from './classs';
-import generate from '@babel/generator';
 import { EaExpression } from './expression';
 
 
@@ -16,11 +15,8 @@ export class EaStatement extends EaObject<t.Program>{
     private _statements?:EaObject[]
     private _classs?:EaClass[]
 
-
     /**
      * 获取代码
-     * 
-     * 
      * 
      */
     get body(){
@@ -28,8 +24,6 @@ export class EaStatement extends EaObject<t.Program>{
     }    
     /**
      * 遍历所有函数声明
-     * 
-     * 
      * 
      */
     get functions(){
@@ -42,9 +36,9 @@ export class EaStatement extends EaObject<t.Program>{
                     || t.isExportNamedDeclaration(node)                    
             }).map((node)=>{
                 if(t.isExportDefaultDeclaration(node)){
-                    return new EaFunction(node.declaration as t.FunctionDeclaration) 
+                    return new EaFunction(node.declaration as t.FunctionDeclaration,this.ast) 
                 }else if(t.isExportNamedDeclaration(node)){
-                    return new EaFunction(node.declaration as t.FunctionDeclaration)
+                    return new EaFunction(node.declaration as t.FunctionDeclaration,this.ast)
                 }else{
                     return new EaFunction(node,this.ast)                   
                 }                
@@ -79,7 +73,7 @@ export class EaStatement extends EaObject<t.Program>{
             this._classs = this.ast.body.filter((node:t.Node)=>{
                 return t.isClassDeclaration(node)
             }).map((node)=>{
-                    return new EaClass(node)                   
+                    return new EaClass(node,this.ast)                   
             })
         }
         return this._classs!   
@@ -97,26 +91,30 @@ export class EaStatement extends EaObject<t.Program>{
         return this._statements 
     }    
     /**
-     * 按顺序遍历所有节点，返回节点对象
+     * 按顺序遍历所有节点，返回对象列表
      * @returns 
      */
     [Symbol.iterator](): Iterator<EaObject>{
         return (new FlexIterator<any,any,any>(this.ast.body,{
+            pick:(item)=>{
+                return t.isVariableDeclaration(item) ?  (item as t.VariableDeclaration).declarations  : item
+            },
             transform:(node:t.Node)=>{
                 if(t.isFunctionDeclaration(node)){
                     return new EaFunction(node,this.ast)
-                }else if(t.isVariableDeclaration(node)){
+                }else if(t.isVariableDeclarator(node)){
                     return new EaVariable(node,this.ast)
                 }else if(t.isClassDeclaration(node)){
                     return new EaClass(node,this.ast)
                 }else if(t.isExpression(node)){
-                    return new EaExpression(node)
+                    return new EaExpression(node,this.ast)
                 }else if(t.isBlockStatement(node)){
-                    return new EaStatement(node)
+                    return new EaStatement(node,this.ast)
                 }else{
-                    return new EaObject(node)
+                    return new EaObject(node,this.ast)
                 }
-            }
+            },
+            recursion:true
         }))[Symbol.iterator]()
     } 
 }

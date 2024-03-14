@@ -465,47 +465,47 @@ describe("Classs",()=>{
         `)
         expect(code.sourceType).toBe("module")
         expect(code.imports.length).toBe(6)
-        // expect(code.imports[0].specifiers.length).toBe(3)
-        // expect(code.imports[0].specifiers[0].local).toBe("a")
-        // expect(code.imports[0].specifiers[0].name).toBe("a")
-        // expect(code.imports[0].specifiers[1].name).toBe("b")
-        // expect(code.imports[0].specifiers[1].local).toBe("B")
-        // expect(code.imports[0].specifiers[2].name).toBe("c")
-        // expect(code.imports[0].specifiers[2].local).toBe("c")
-        // expect(code.imports[0].source).toBe("a-module")
+        expect(code.imports[0].specifiers.length).toBe(3)
+        expect(code.imports[0].specifiers[0].local).toBe("a")
+        expect(code.imports[0].specifiers[0].name).toBe("a")
+        expect(code.imports[0].specifiers[1].name).toBe("b")
+        expect(code.imports[0].specifiers[1].local).toBe("B")
+        expect(code.imports[0].specifiers[2].name).toBe("c")
+        expect(code.imports[0].specifiers[2].local).toBe("c")
+        expect(code.imports[0].source).toBe("a-module")
 
-        // expect(code.imports[1].specifiers.length).toBe(1)
-        // expect(code.imports[1].specifiers[0].local).toBe("d")
-        // expect(code.imports[1].specifiers[0].name).toBe("d")
-        // expect(code.imports[1].source).toBe("b-module")
+        expect(code.imports[1].specifiers.length).toBe(1)
+        expect(code.imports[1].specifiers[0].local).toBe("d")
+        expect(code.imports[1].specifiers[0].name).toBe("d")
+        expect(code.imports[1].source).toBe("b-module")
 
-        // expect(code.imports[2].specifiers.length).toBe(1)
-        // expect(code.imports[2].specifiers[0].local).toBe("e")
-        // expect(code.imports[2].specifiers[0].name).toBe("e")
-        // expect(code.imports[2].source).toBe("c-module")
+        expect(code.imports[2].specifiers.length).toBe(1)
+        expect(code.imports[2].specifiers[0].local).toBe("e")
+        expect(code.imports[2].specifiers[0].name).toBe("e")
+        expect(code.imports[2].source).toBe("c-module")
 
-        // expect(code.imports[3].specifiers.length).toBe(0)
-        // expect(code.imports[3].specifiers.length).toBe(0)
-        // expect(code.imports[3].source).toBe("d-module")
+        expect(code.imports[3].specifiers.length).toBe(0)
+        expect(code.imports[3].specifiers.length).toBe(0)
+        expect(code.imports[3].source).toBe("d-module")
 
-        // expect(code.imports[4].specifiers.length).toBe(3)
-        // expect(code.imports[4].specifiers[0].local).toBe("x")
-        // expect(code.imports[4].specifiers[0].name).toBe("x")
-        // expect(code.imports[4].specifiers[1].local).toBe("y")
-        // expect(code.imports[4].specifiers[1].name).toBe("y")
-        // expect(code.imports[4].specifiers[2].local).toBe("z")
-        // expect(code.imports[4].specifiers[2].name).toBe("z")
-        // expect(code.imports[4].specifiers[2].kind).toBe("type")
-        // expect(code.imports[4].source).toBe("e-module")
+        expect(code.imports[4].specifiers.length).toBe(3)
+        expect(code.imports[4].specifiers[0].local).toBe("x")
+        expect(code.imports[4].specifiers[0].name).toBe("x")
+        expect(code.imports[4].specifiers[1].local).toBe("y")
+        expect(code.imports[4].specifiers[1].name).toBe("y")
+        expect(code.imports[4].specifiers[2].local).toBe("z")
+        expect(code.imports[4].specifiers[2].name).toBe("z")
+        expect(code.imports[4].specifiers[2].kind).toBe("type")
+        expect(code.imports[4].source).toBe("e-module")
 
-        // expect(code.imports[5].specifiers.length).toBe(2)
-        // expect(code.imports[5].specifiers[0].local).toBe("m")
-        // expect(code.imports[5].specifiers[0].name).toBe("m")
-        // expect(code.imports[5].specifiers[0].kind).toBe("type")
-        // expect(code.imports[5].specifiers[1].local).toBe("n")
-        // expect(code.imports[5].specifiers[1].name).toBe("n")
-        // expect(code.imports[5].specifiers[1].kind).toBe("type")
-        // expect(code.imports[5].source).toBe("f-module")
+        expect(code.imports[5].specifiers.length).toBe(2)
+        expect(code.imports[5].specifiers[0].local).toBe("m")
+        expect(code.imports[5].specifiers[0].name).toBe("m")
+        expect(code.imports[5].specifiers[0].kind).toBe("type")
+        expect(code.imports[5].specifiers[1].local).toBe("n")
+        expect(code.imports[5].specifiers[1].name).toBe("n")
+        expect(code.imports[5].specifiers[1].kind).toBe("type")
+        expect(code.imports[5].source).toBe("f-module")
     })
     test("读取模块的导出信息",()=>{
         const code = new EasyAST(`
@@ -521,8 +521,47 @@ describe("Classs",()=>{
             export default function(){}
             export = 1
             export * from './anotherModule';
+            o.x.d().f().ff(1,2)
         `)
         console.log("--")
         console.log(code.functions)
+
     })
+
+    
 })
+
+
+// describe("Statements",()=>{
+
+//     test("遍历代码块",()=>{
+//         const code = new EasyAST(`
+//             let a = 1,b=true,c="a"
+//             {
+//                 let d = 1,e=2
+//                 const f = 3
+//                 {
+//                     let g = ()=>{}
+//                     const h = /^f/g
+//                 }                
+//             }
+//             class Animal{}
+//             class Dog extends Animal{
+//             }
+//         `)
+//         for(const statement of code.statements){
+//             console.log(statement)
+//         }
+     
+//         expect(code.statements.length).toBe(6)
+//         expect(code.statements[0].type).toBe("VariableDeclaration")
+//         expect(code.statements[1].type).toBe("BlockStatement")
+//         expect(code.statements[2].type).toBe("ClassDeclaration")
+
+
+
+
+//     })
+
+//     test("遍历类方法",()=>{}
+// )})

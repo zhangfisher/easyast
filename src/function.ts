@@ -53,7 +53,7 @@ export class EaFunctionReturns extends EaObject<t.ReturnStatement>{
     }
 }
  
-export class EaFunction extends EaObject<t.FunctionDeclaration,t.Node, EaFunctionProps>{
+export class EaFunction extends EaObject<t.FunctionDeclaration, EaFunctionProps>{
     private _arguments?:EaArguemnt[]      
     private _body?:EaStatement
     private _declaration?:string    
@@ -88,6 +88,12 @@ export class EaFunction extends EaObject<t.FunctionDeclaration,t.Node, EaFunctio
     }
     get body(){
         return this._body || (this._body = new EaStatement(this.ast.body,undefined))
+    }
+    /**
+    * 是否是导出函数
+    */
+    get hasExport(){
+        return this.parentAst && t.isExportNamedDeclaration(this.parentAst)
     }
     /**
      * 函数返回值

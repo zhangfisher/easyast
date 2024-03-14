@@ -1,4 +1,3 @@
-import { EaClassProperty } from './classs';
 /**
  *
  *  变量 
