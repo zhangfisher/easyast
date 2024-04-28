@@ -9,33 +9,44 @@ import { EaExport } from './exports';
 import { EaImport } from './imports';
 
 export interface IEaStatement extends EaObject{}
- 
+
 export class EaStatement<Node extends t.Node=t.Node,Props extends IEaObjectProps = IEaObjectProps> extends EaObject<t.Program>{
     functions:EaFunction[] = []
     variables:EaVariable[] = []
     statements:EaObject[] = []
-    classs:EaClass[]  = []
-    exports:EaExport[] = []             // 导出的对象
-    imports:EaImport[] = []             // 导入的对象
-
+    classs:EaClass[]  = []              
+    // 保存按顺序遍历的对象
+    objects:EaObject[] = []
     constructor(node:Node | Props,parentNode?:t.Node){
         super(node,parentNode)
         this.parse()
     }
     get sourceType(){
         return this.ast.sourceType
-    }
+    } 
     /**
      * 遍历所有节点生成functions,variables,class等对象
      */
     parse(){
-        [...this]
+        this.functions=[]
+        this.variables=[]
+        this.statements=[]
+        this.classs =[]        
+        this.objects=[]
+        this.objects = [...this.getIterator()]
+    }
+    /**
+     * 返回this.objects的可迭代对象
+     * @returns 
+     */
+    [Symbol.iterator](): Iterator<EaObject>{
+        return this.objects[Symbol.iterator]()
     }
     /**
      * 按顺序遍历所有节点，返回对象列表
      * @returns 
      */
-    [Symbol.iterator](): Iterator<EaObject>{
+    getIterator(){
         return (new FlexIterator<any,any,any>(this.ast.body,{
             pick:(node)=>{
                 if(t.isExportNamedDeclaration(node)){
@@ -86,19 +97,21 @@ export class EaStatement<Node extends t.Node=t.Node,Props extends IEaObjectProps
                 }else if(t.isBlockStatement(node)){
                     eaObject = new EaStatement(node,this.ast)
                     this.statements.push(eaObject)
-                }else if(t.isExportDeclaration(node)){
-                    eaObject = new EaExport(node,this.ast)
-                    this.exports.push(eaObject)
-                }else if(t.isImportDeclaration(node)){
-                    eaObject = new EaImport(node,this.ast)
-                    this.imports.push(eaObject)                    
-                }else{
-                    eaObject = new EaObject(node,this.ast)
+                }else{                    
+                    eaObject = this.createEaObject(node)
                 } 
                 return eaObject
             },
             recursion:true
-        }))[Symbol.iterator]()
+        }))
     } 
+    /**
+     * 供子类重写，用于创建EaObject对象
+     * @param node 
+     * @returns 
+     */
+    createEaObject(node:t.Node):EaObject | undefined{
+        return new EaObject(node,this.ast)
+    }
 }
 

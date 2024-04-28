@@ -639,13 +639,12 @@ describe("Exports",()=>{
         for(let obj of code){
             console.log(obj)
         }
-        expect(code.functions.length).toBe(5)
+        expect(code.functions.length).toBe(2)
+        expect(code.variables.length).toBe(6)
+        expect(code.classs.length).toBe(1)
+        expect(code.exports.length).toBe(9)
 
-        expect(code.variables.length).toBe(5)
-
-
-
-
+ 
 
     })
 

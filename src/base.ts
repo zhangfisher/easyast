@@ -33,7 +33,7 @@ export class EaObject<Node extends t.Node=t.Node,Props extends IEaObjectProps = 
     get code(){
         return generate(this.ast,{
             retainLines:false,
-            compact:true
+            compact:false
         }).code
     }  
 

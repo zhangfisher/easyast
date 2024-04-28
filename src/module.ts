@@ -8,7 +8,22 @@ import { EaImport } from "./imports";
 
 
 export class EaModule extends EaStatement<t.Program>{    
-    exports:EaExport[] = []             // 导出的对象
-    imports:EaImport[] = []             // 导入的对象
-        
+    public exports:EaExport[] = []      
+    public imports:EaImport[] = []              
+    createEaObject(node:t.Node){
+        let eaObject
+        if(t.isExportDeclaration(node)){
+            eaObject = new EaExport(node,this.ast)
+            this.exports.push(eaObject)
+            return eaObject
+        }else if(t.isImportDeclaration(node)){
+            eaObject = new EaImport(node,this.ast)
+            if(!this.imports) this.imports =[]
+            this.imports.push(eaObject)
+            return eaObject                 
+        }else{
+            return super.createEaObject(node)
+        }
+    }
 }
+
