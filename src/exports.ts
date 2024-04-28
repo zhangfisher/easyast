@@ -9,30 +9,29 @@ EaExport.source
 
 */
 
-import generate from "@babel/generator"
 import { EaObject } from "./base"
 import * as t from "@babel/types"
 
-// export class EaExportSpecifier  extends EaObject<t.ExportSpecifier>{
-//     get kind(){
-//         const pKind =this.parentAst && t.isImportDeclaration(this.parentAst) ?  this.parentAst.importKind : undefined
-//         return pKind!=='value' ? pKind : this.ast.importKind
-//     }
-//     /**
-//      * 本地名称, 即导入后的重命名
-//      */
-//     get local(){
-//         return this.ast.local ? this.ast.local.name : this.name
-//     }
-//     /**
-//      * 导入的名称
-//      */
-//     get name(){
-//         return this.ast.imported ? 
-//             (t.isIdentifier(this.ast.imported)  ? this.ast.imported.name : this.ast.imported.value)
-//             : (this.ast.local ? this.ast.local.name : '')
-//     }
-// }
+export class EaExportSpecifier  extends EaObject<t.ExportSpecifier>{
+    get kind(){        
+        return this.ast.exportKind
+    }
+    /**
+     * 本地名称, 即导入后的重命名
+     */
+    get local(){
+        return this.ast.local.name 
+    } 
+    /**
+     * 导出的名称
+     */
+    get exported(){
+        return t.isStringLiteral(this.ast.exported) ? this.ast.exported.value : this.ast.exported.name 
+    }
+    get isExported(){
+        return true
+    } 
+}
 
 
 /**
@@ -40,26 +39,35 @@ import * as t from "@babel/types"
  */
 export class EaExport extends EaObject<t.ExportDeclaration>{
     private _specifiers?:EaExportSpecifier[]
-
     get specifiers(){
         if(!this._specifiers){
-            this._specifiers = this.ast.declaration.map((node)=>{
-                return new EaExportSpecifier(node,this.ast)
-            })
+            if(t.isExportNamedDeclaration(this.ast) && this.ast.specifiers.length>0){
+                this._specifiers = this.ast.specifiers.map((node)=>{
+                    return new EaExportSpecifier(node,this.ast)
+                })
+            }
         }
         return this._specifiers
     }
-    /**
-     * 当使用export {} from "x=module"时，source=module
-     */
     get source(){
-        return this.ast.source.value
-    } 
-    /**
-     * "type" | "typeof" | "value" 
-     */
+        return t.isExportAllDeclaration(this.ast) ?  this.ast.source.value : ''
+    }
+
     get kind(){
-        return this.ast.importKind
+        return this.ast.exportKind
+    }
+    /**
+     * 是否导出所有
+     */
+    get all(){
+        return t.isExportAllDeclaration(this.ast)
+    }
+    /**
+     * 是否默认导出
+     */
+    get default(){
+        return t.isExportDefaultDeclaration(this.ast)
     }
 
 }
+

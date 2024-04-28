@@ -2,119 +2,103 @@ import * as t from '@babel/types';
 import { FlexIterator } from './utils';
 import { EaFunction } from './function';
 import { EaVariable } from './variable';
-import { EaObject } from './base';
+import { EaObject, IEaObjectProps } from './base';
 import { EaClass } from './classs';
 import { EaExpression } from './expression';
-
+import { EaExport } from './exports'; 
+import { EaImport } from './imports';
 
 export interface IEaStatement extends EaObject{}
  
-export class EaStatement extends EaObject<t.Program>{
-    private _functions?:EaFunction[]
-    private _variables?:EaVariable[]
-    private _statements?:EaObject[]
-    private _classs?:EaClass[]
+export class EaStatement<Node extends t.Node=t.Node,Props extends IEaObjectProps = IEaObjectProps> extends EaObject<t.Program>{
+    functions:EaFunction[] = []
+    variables:EaVariable[] = []
+    statements:EaObject[] = []
+    classs:EaClass[]  = []
+    exports:EaExport[] = []             // 导出的对象
+    imports:EaImport[] = []             // 导入的对象
 
-    /**
-     * 获取代码
-     * 
-     */
-    get body(){
-        return 
-    }    
-    /**
-     * 遍历所有函数声明
-     * 
-     */
-    get functions(){
-        if(!this._functions){
-            this._functions = this.ast.body.filter((node:t.Node)=>{
-                return t.isFunctionDeclaration(node) 
-                    || t.isFunctionExpression(node) 
-                    || t.isArrowFunctionExpression(node) 
-                    || t.isExportDefaultDeclaration(node)
-                    || t.isExportNamedDeclaration(node)                    
-            }).map((node)=>{
-                if(t.isExportDefaultDeclaration(node)){
-                    return new EaFunction(node.declaration as t.FunctionDeclaration,this.ast) 
-                }else if(t.isExportNamedDeclaration(node)){
-                    return new EaFunction(node.declaration as t.FunctionDeclaration,this.ast)
-                }else{
-                    return new EaFunction(node,this.ast)                   
-                }                
-            })
-        }
-        return this._functions! 
-    } 
-    /**
-    * 遍历所有变量声明
-    */
-    get variables(){
-        if(!this._variables){
-            this._variables = [...new FlexIterator<t.VariableDeclarator,EaVariable,t.VariableDeclaration>(this.ast.body.filter((node: t.Node) => {
-                    return t.isVariableDeclaration(node);
-                }) as unknown as t.VariableDeclarator[],{
-                pick:(item:t.VariableDeclaration | t.VariableDeclarator)=>{
-                    return t.isVariableDeclaration(item) ?  (item as t.VariableDeclaration).declarations  : item
-                },
-                transform:(node:t.VariableDeclarator,parent?:t.VariableDeclaration)=>{                    
-                    return new EaVariable(node,parent)
-                },
-                recursion:true
-            })]
-        }
-        return this._variables!
-    } 
-    /**
-    * 遍历所有类明
-    */
-    get classs(){
-        if(!this._classs){
-            this._classs = this.ast.body.filter((node:t.Node)=>{
-                return t.isClassDeclaration(node)
-            }).map((node)=>{
-                    return new EaClass(node,this.ast)                   
-            })
-        }
-        return this._classs!   
-    } 
+    constructor(node:Node | Props,parentNode?:t.Node){
+        super(node,parentNode)
+        this.parse()
+    }
     get sourceType(){
         return this.ast.sourceType
     }
     /**
-     * 遍历所有代码块
+     * 遍历所有节点生成functions,variables,class等对象
      */
-    get statements(){
-        if(!this._statements){
-            this._statements = [...this]
-        }
-        return this._statements 
-    }    
+    parse(){
+        [...this]
+    }
     /**
      * 按顺序遍历所有节点，返回对象列表
      * @returns 
      */
     [Symbol.iterator](): Iterator<EaObject>{
         return (new FlexIterator<any,any,any>(this.ast.body,{
-            pick:(item)=>{
-                return t.isVariableDeclaration(item) ?  (item as t.VariableDeclaration).declarations  : item
+            pick:(node)=>{
+                if(t.isExportNamedDeclaration(node)){
+                    const declaration = (node as t.ExportNamedDeclaration).declaration
+                    if(declaration){
+                        if(t.isVariableDeclaration(declaration)){
+                            const declarations = (declaration as t.VariableDeclaration).declarations
+                            declarations.forEach((node)=>{
+                                // @ts-ignore
+                                node._easyAstMeta = {exported :true}
+                            })
+                            return declarations
+                        }else{
+                            return declaration
+                        }                    
+                    }else {
+                        return node
+                    }                    
+                }else if(t.isExportAllDeclaration(node)){                    
+                    return node
+                }else if(t.isExportDefaultDeclaration(node)){
+                    return node.declaration
+                }else if(t.isExportNamespaceSpecifier(node)){
+                    return node
+                }else if(t.isExportSpecifier(node)){
+                    return node
+                }else if(t.isExportDeclaration(node)){
+                    return node
+                }else if(t.isImportDeclaration(node)){
+                    return node
+                }else{
+                    return node
+                }               
             },
             transform:(node:t.Node)=>{
+                let eaObject
                 if(t.isFunctionDeclaration(node)){
-                    return new EaFunction(node,this.ast)
+                    eaObject = new EaFunction(node,this.ast)
+                    this.functions.push(eaObject)
                 }else if(t.isVariableDeclarator(node)){
-                    return new EaVariable(node,this.ast)
+                    eaObject = new EaVariable(node,this.ast)
+                    this.variables.push(eaObject)
                 }else if(t.isClassDeclaration(node)){
-                    return new EaClass(node,this.ast)
+                    eaObject = new EaClass(node,this.ast)
+                    this.classs.push(eaObject)
                 }else if(t.isExpression(node)){
-                    return new EaExpression(node,this.ast)
+                    eaObject = new EaExpression(node,this.ast)
                 }else if(t.isBlockStatement(node)){
-                    return new EaStatement(node,this.ast)
+                    eaObject = new EaStatement(node,this.ast)
+                    this.statements.push(eaObject)
+                }else if(t.isExportDeclaration(node)){
+                    eaObject = new EaExport(node,this.ast)
+                    this.exports.push(eaObject)
+                }else if(t.isImportDeclaration(node)){
+                    eaObject = new EaImport(node,this.ast)
+                    this.imports.push(eaObject)                    
                 }else{
-                    return new EaObject(node,this.ast)
-                }
+                    eaObject = new EaObject(node,this.ast)
+                } 
+                return eaObject
             },
             recursion:true
         }))[Symbol.iterator]()
     } 
 }
+

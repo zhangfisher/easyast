@@ -1,10 +1,23 @@
 import generate, { GeneratorOptions } from '@babel/generator';
 import * as t from '@babel/types';
 import { EaObject } from './base';
+import { EaVariable } from './variable';
+import { EaClass } from './classs';
+import { EaFunction } from './function';
+import { EaStatement } from './statement';
 
-
-export function getEaObject(node:t.Node){
-    return new EaObject(node)
+export function getEaObject(node:t.Node,parentNode?:t.Node){    
+    if(t.isVariableDeclarator(node)){
+        return new EaVariable(node,parentNode)
+    }else if(t.isClassDeclaration(node)){
+        return new EaClass(node,parentNode)
+    }else if(t.isFunctionDeclaration(node)){
+        return new EaFunction(node)    
+    }else if(t.isStatement(node)){
+        return new EaStatement(node)
+    }else{
+        return new EaObject(node)
+    }    
 }
 
 /**
@@ -203,3 +216,8 @@ export function isEsmModule(code:string){
     const esmPattern = /import\s+.*\s+from\s+['"].*['"]|export\s+.*|export\s+{\s*.*\s*}\s+from\s+['"].*['"]/;
     return esmPattern.test(code); 
 }
+
+
+export function getRandId(){
+    return Math.random().toString(36).slice(2)
+} 

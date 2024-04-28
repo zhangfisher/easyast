@@ -3,6 +3,10 @@ import { EaObject } from "./base"
 import * as t from "@babel/types"
 
 export class EaImportSpecifier  extends EaObject<t.ImportSpecifier>{
+    /**
+     * 类型
+     * 返回 "type" | "typeof" | "value"
+     */
     get kind(){
         const pKind =this.parentAst && t.isImportDeclaration(this.parentAst) ?  this.parentAst.importKind : undefined
         return pKind!=='value' ? pKind : this.ast.importKind

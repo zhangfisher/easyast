@@ -4,7 +4,7 @@ import { EaArguemnt } from './arguemnt';
 import { EaObject, IEaObjectProps } from './base';
 import { EaStatement } from './statement';
 import  generate from '@babel/generator';
-
+ 
 /**
  * 创建一个函数对象
  * 
@@ -88,13 +88,7 @@ export class EaFunction extends EaObject<t.FunctionDeclaration, EaFunctionProps>
     }
     get body(){
         return this._body || (this._body = new EaStatement(this.ast.body,undefined))
-    }
-    /**
-    * 是否是导出函数
-    */
-    get hasExport(){
-        return this.parentAst && t.isExportNamedDeclaration(this.parentAst)
-    }
+    } 
     /**
      * 函数返回值
      */

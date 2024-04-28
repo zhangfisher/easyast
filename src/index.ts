@@ -28,12 +28,13 @@ func.body
  */
 
 import * as parser from "@babel/parser";
-import traverse from "@babel/traverse";
 import * as t from "@babel/types";
 import { EaStatement } from "./statement";
-import { isEsmModule } from "./utils";
+import { getEaObject, isEsmModule } from "./utils";
 import { EaImport } from "./imports";
 import { ParseResult } from "@babel/parser";
+import type { EaFunction } from "./function";
+import { EaObject } from "./base";
 
 export interface EasyASTOptions{
     typescript: boolean;
@@ -42,7 +43,7 @@ export interface EasyASTOptions{
 }
 
 
-export class EasyAST {
+export class EasyAST{
     options: EasyASTOptions;
     private _ast?:ParseResult<t.File>    
     private _babelParserOptions:parser.ParserOptions={
@@ -102,6 +103,9 @@ export class EasyAST {
     get classs(){
         return this.body.classs
     }
+    get exports(){
+        return this.body.exports
+    }
     get statements(){
         return this.body.statements
     } 
@@ -115,8 +119,13 @@ export class EasyAST {
             
         }
         return this._imports!
-    }
+    } 
     [Symbol.iterator](){
         return this.body[Symbol.iterator]()
-    }
+    } 
+
+
+
+
 }
+ 

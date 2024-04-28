@@ -454,6 +454,116 @@ describe("Classs",()=>{
         expect(code2.sourceType).toBe("module")
     })
 
+    test("读取模块的导出信息",()=>{
+        const code = new EasyAST(`
+            const a = 1  // this is a 
+            // this is b
+            let b = 2
+            export { a, b }
+            export const x=true
+            export function f1(){}
+            export const f2=()=>{},f3=()=>{}
+            export class C{}
+            export function f(){}
+            export default function(){}
+            export = 1
+            export * from './anotherModule';
+            o.x.d().f().ff(1,2)
+        `)
+        console.log("--")
+        console.log(code.functions)
+
+    })
+
+    
+})
+
+
+describe("Statements",()=>{
+
+    test("遍历代码块",()=>{
+        const code = new EasyAST(`
+            let a = 1,b=true,c="a"
+            {
+                let d = 1,e=2
+                const f = 3
+                {
+                    let g = ()=>{}
+                    const h = /^f/g
+                }                
+            }
+            class Animal{}
+            class Dog extends Animal{
+            }
+        `)
+        for(const statement of code.statements){
+            console.log(statement)
+        }
+     
+        expect(code.statements.length).toBe(6)
+        // let a = 1,b=true,c="a"对应了三个代码块
+        expect(code.statements[0].type).toBe("VariableDeclarator")
+        expect(code.statements[1].type).toBe("VariableDeclarator")
+        expect(code.statements[2].type).toBe("VariableDeclarator")
+        // {}里面是一个代码块
+        expect(code.statements[3].type).toBe("BlockStatement")
+        // 最后的是两个类声明
+        expect(code.statements[4].type).toBe("ClassDeclaration")
+        expect(code.statements[5].type).toBe("ClassDeclaration")
+
+
+
+    })
+
+
+})
+
+
+describe("Imports",()=>{  
+    test("遍历导入模块",()=>{
+        const code = new EasyAST(`
+            import a from "a-module"
+            import {b,c as C} from "b-module"
+            import * as d from "c-module"
+            import "d-module"
+            import {x,y,type z} from "e-module"
+        `)
+        const imports = code.imports
+        expect(imports.length).toBe(5)
+        // import a from "a-module"
+        expect(imports[0].specifiers.length).toBe(1)
+        expect(imports[0].specifiers[0].name).toBe("a")
+        // import {b,c as C} from "b-module"
+        expect(imports[1].specifiers.length).toBe(2)
+        expect(imports[1].specifiers[0].name).toBe("b")
+        expect(imports[1].specifiers[1].name).toBe("c")
+        expect(imports[1].specifiers[1].local).toBe("C")
+
+        // import * as d from "c-module"
+        expect(imports[2].specifiers.length).toBe(1)
+        expect(imports[2].specifiers[0].name).toBe("d")
+
+        // import "d-module"
+        expect(imports[3].specifiers.length).toBe(0)
+        
+        // import {x,y,type z} from "e-module"
+        expect(imports[4].specifiers.length).toBe(3)
+        expect(imports[4].specifiers[0].name).toBe("x")
+        expect(imports[4].specifiers[1].name).toBe("y")
+        expect(imports[4].specifiers[2].name).toBe("z")
+        expect(imports[4].specifiers[2].kind).toBe("type")
+
+
+
+        expect(imports[0].source).toBe("a-module")
+        expect(imports[1].source).toBe("b-module")
+        expect(imports[2].source).toBe("c-module")
+        expect(imports[3].source).toBe("d-module")
+        expect(imports[4].source).toBe("e-module")
+
+
+    })
+    
     test("遍历模块导入信息",()=>{
         const code = new EasyAST(`
             import {a,b as B,c} from "a-module"
@@ -507,61 +617,41 @@ describe("Classs",()=>{
         expect(code.imports[5].specifiers[1].kind).toBe("type")
         expect(code.imports[5].source).toBe("f-module")
     })
-    test("读取模块的导出信息",()=>{
-        const code = new EasyAST(`
-            const a = 1  // this is a 
-            // this is b
-            let b = 2
-            export { a, b }
-            export const x=true
-            export function f1(){}
-            export const f2=()=>{},f3=()=>{}
-            export class C{}
-            export function f(){}
-            export default function(){}
-            export = 1
-            export * from './anotherModule';
-            o.x.d().f().ff(1,2)
-        `)
-        console.log("--")
-        console.log(code.functions)
-
-    })
-
-    
 })
 
 
-// describe("Statements",()=>{
+describe("Exports",()=>{  
+    test("遍历模块的导出",()=>{
+        const code = new EasyAST(`
+            export const a =1 ,b=2, c=3,d = ()=>1, e = /^f/g
+            export function f1(){}
+            export const f2=()=>{}
+            export class C{}
+            export {a,f1,C as C1}            
+            export default function(){}    
+            export {b1,b2 as b200} from "b-module"     
+            export * from "a-module"         
+            export * from "a-module?111"       
+            export * from "a-module/x/v"       
+            export * from "aa:a-module/x/v"       
+            export * as cmodule from "c-module"                     
+        `)
+        for(let obj of code){
+            console.log(obj)
+        }
+        expect(code.functions.length).toBe(5)
 
-//     test("遍历代码块",()=>{
-//         const code = new EasyAST(`
-//             let a = 1,b=true,c="a"
-//             {
-//                 let d = 1,e=2
-//                 const f = 3
-//                 {
-//                     let g = ()=>{}
-//                     const h = /^f/g
-//                 }                
-//             }
-//             class Animal{}
-//             class Dog extends Animal{
-//             }
-//         `)
-//         for(const statement of code.statements){
-//             console.log(statement)
-//         }
-     
-//         expect(code.statements.length).toBe(6)
-//         expect(code.statements[0].type).toBe("VariableDeclaration")
-//         expect(code.statements[1].type).toBe("BlockStatement")
-//         expect(code.statements[2].type).toBe("ClassDeclaration")
+        expect(code.variables.length).toBe(5)
 
 
 
 
-//     })
 
-//     test("遍历类方法",()=>{}
-// )})
+    })
+
+
+})
+
+export {
+    
+}

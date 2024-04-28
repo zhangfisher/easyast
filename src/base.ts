@@ -1,7 +1,6 @@
 import * as t from "@babel/types"
 import generate from "@babel/generator";
 import traverse, { Scope } from "@babel/traverse"; 
-import { getTypeAnnotation } from "./utils";
 
 export interface IEaObjectProps extends Record<string,any>{
 
@@ -19,10 +18,10 @@ export class EaObject<Node extends t.Node=t.Node,Props extends IEaObjectProps = 
     constructor(node:Node | Props,parentNode?:ParentNode){
         if(t.isNode(node)){
             this._ast = node as Node
-        }else if(typeof(node)=='object'){
+        }else if(typeof(node)=='object'){ //创建对象是使用
             this._ast = this.createAstNode(node as Props) as unknown as Node
         }else{
-            throw new Error("node must be AstNode or Object")        
+            throw new Error("node must be ASTNode or Object")        
         }
         this._parentAst = parentNode
     }
@@ -36,7 +35,12 @@ export class EaObject<Node extends t.Node=t.Node,Props extends IEaObjectProps = 
             retainLines:false,
             compact:true
         }).code
-    }    
+    }  
+
+    get meta(){
+        // @ts-ignore
+        return this._ast?._eastAstMeta || {} 
+    }  
     /**
      * 获取当前节点的上下文
      */
@@ -50,6 +54,12 @@ export class EaObject<Node extends t.Node=t.Node,Props extends IEaObjectProps = 
      */
     protected createAstNode(props:Props){        
         throw new Error("createAstNode must be implemented")
+    }    
+    /**
+    *  该函数是否有导出
+    */
+    get isExported(){
+        return this.parentAst && t.isExportNamedDeclaration(this.parentAst)
     }
     /**
      * 获取节点的声明代码
