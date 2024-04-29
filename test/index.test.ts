@@ -654,15 +654,22 @@ describe("Exports",()=>{
 
 describe("Expression",()=>{  
     test("表达式功能测试",()=>{
-        const code = new EasyAST(`       
+        const code = new EasyAST(`        
+            (()=>{})()
             a
-            const a = 1,b=true,c="a"            
-            let d = a+b/2+Math.abs(x)          
+            b=2
             1+1
-            a+b
-            let x = 1+1, y=a+1,z = a+b
+            a+b+c
+            x.y.z
+            new Date()
+            x.y.z()
         `)
-        expect(code.statements[0].objects).toBe(7)
+        expect(code.expressions.length).toBe(8)
 
     })
 })
+
+
+// const a = 1,b=true,c="a"            
+// let d = a+b/2+Math.abs(x) 
+// let x = 1+1, y=a+1,z = a+b 

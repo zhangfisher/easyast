@@ -4,7 +4,7 @@ import { EaFunction } from './function';
 import { EaVariable } from './variable';
 import { EaObject, IEaObjectProps } from './base';
 import { EaClass } from './classs';
-import { EaExpression } from './expression'; 
+import { EaArrayExpression, EaAssignmentExpression, EaAwaitExpression, EaBinaryExpression, EaConditionalExpression, EaExpression, EaLogicalExpression, EaMemberExpression, EaNewExpression, EaYieldExpression } from './expression'; 
 
 export interface IEaStatement extends EaObject{}
 
@@ -12,7 +12,8 @@ export class EaStatement<Node extends t.Node=t.Node,Props extends IEaObjectProps
     private _functions:EaFunction[] = []
     private _variables:EaVariable[] = []
     private _statements:EaObject[] = []
-    private _classs:EaClass[]  = []              
+    private _classs:EaClass[]  = []    
+    private _expressions:EaExpression[] =[]
     // 保存按顺序遍历的对象
     private _objects:EaObject[] = []
     protected _parsed:boolean = false
@@ -41,6 +42,11 @@ export class EaStatement<Node extends t.Node=t.Node,Props extends IEaObjectProps
     get objects(){
         if(!this._parsed) this.parse()
         return this._objects        
+    }
+    
+    get expressions(){
+        if(!this._parsed) this.parse()
+        return this._expressions        
     }
 
     /**
@@ -85,6 +91,8 @@ export class EaStatement<Node extends t.Node=t.Node,Props extends IEaObjectProps
                     }else {
                         return node
                     }                    
+                }else if(t.isVariableDeclaration(node)){
+                    return node.declarations
                 }else if(t.isExportAllDeclaration(node)){                    
                     return node
                 }else if(t.isExportDefaultDeclaration(node)){
@@ -97,8 +105,14 @@ export class EaStatement<Node extends t.Node=t.Node,Props extends IEaObjectProps
                     return node
                 }else if(t.isImportDeclaration(node)){
                     return node
-                }else if(t.isVariableDeclaration(node)){
-                    return node.declarations
+                }else if(t.isStatement(node)){
+                    if(t.isExpressionStatement(node)){
+                        if(t.isExpression(node.expression)){
+                            return node.expression
+                        }else{
+                            return node
+                        }                        
+                    }
                 }else{
                     return node
                 }               
@@ -114,9 +128,13 @@ export class EaStatement<Node extends t.Node=t.Node,Props extends IEaObjectProps
                 }else if(t.isClassDeclaration(node)){
                     eaObject = new EaClass(node,this.ast)
                     this._classs.push(eaObject)
+                }else if(t.isExpression(node)){
+                    eaObject = this.createExpressionObject(node,parent)
+                    this._expressions.push(eaObject)                        
+                        
                 }else if(t.isStatement(node)){
-                    eaObject = new EaStatement(node,this.ast)
-                    this._statements.push(eaObject)
+                        eaObject = new EaStatement(node,this.ast)
+                        this._statements.push(eaObject)
                 }else{                    
                     eaObject = this.createEaObject(node)
                 }  
@@ -125,6 +143,31 @@ export class EaStatement<Node extends t.Node=t.Node,Props extends IEaObjectProps
             recursion:true
         }))
     } 
+
+    createExpressionObject(node:t.Expression,parent:t.Node){
+        if(t.isBinaryExpression(node)){
+            return new EaBinaryExpression(node,parent)
+        }else if(t.isAssignmentExpression(node)){
+            return new EaAssignmentExpression(node,parent)
+        }else if(t.isMemberExpression(node)){
+            return new EaMemberExpression(node,parent)
+        }else if(t.isArrayExpression(node)){
+            return new EaArrayExpression(node,parent)
+        }else if(t.isAwaitExpression(node)){
+            return new EaAwaitExpression(node,parent)
+        }else if(t.isConditionalExpression(node)){
+            return new EaConditionalExpression(node,parent)
+        }else if(t.isNewExpression(node)){
+            return new EaNewExpression(node,parent)
+        }else if(t.isYieldExpression(node)){
+            return new EaYieldExpression(node,parent)
+        }else if(t.isLogicalExpression(node)){
+            return new EaLogicalExpression(node,parent)
+        }else{
+            return new EaExpression(node,parent)
+        }
+        
+    }
     /**
      * 供子类重写，用于创建EaObject对象
      * @param node 
