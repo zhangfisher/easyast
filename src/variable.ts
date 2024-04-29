@@ -2,8 +2,7 @@ import  generate from '@babel/generator';
 import * as t from '@babel/types';  
 import { EaObject,IEaObjectProps } from './base'; 
 import { getTypeAnnotation } from './utils';
-
-t.typeAnnotation
+import { EaExpression } from './expression';
 
 export interface IEaVariable extends IEaObjectProps{
     name:string
@@ -34,6 +33,8 @@ export class EaVariable extends EaObject<t.VariableDeclarator,IEaVariable> imple
             return initNode.value
         }else if(t.isNumericLiteral(initNode)){
             return initNode.value
+        }else if(t.isExpression(initNode)){
+            return new EaExpression(initNode)
         }else{
             return generate(initNode,{compact:true}).code
         }        

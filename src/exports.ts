@@ -1,14 +1,3 @@
-/**
-
-
-easyast.exports = EaExport[]
-EaExport.declaration 
-EaExport.specifiers
-EaExport.source 
-
-
-*/
-
 import { EaObject } from "./base"
 import * as t from "@babel/types"
 
@@ -27,9 +16,6 @@ export class EaExportSpecifier  extends EaObject<t.ExportSpecifier>{
      */
     get exported(){
         return t.isStringLiteral(this.ast.exported) ? this.ast.exported.value : this.ast.exported.name 
-    }
-    get isExported(){
-        return true
     } 
 }
 

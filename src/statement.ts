@@ -4,42 +4,62 @@ import { EaFunction } from './function';
 import { EaVariable } from './variable';
 import { EaObject, IEaObjectProps } from './base';
 import { EaClass } from './classs';
-import { EaExpression } from './expression';
-import { EaExport } from './exports'; 
-import { EaImport } from './imports';
+import { EaExpression } from './expression'; 
 
 export interface IEaStatement extends EaObject{}
 
 export class EaStatement<Node extends t.Node=t.Node,Props extends IEaObjectProps = IEaObjectProps> extends EaObject<t.Program>{
-    functions:EaFunction[] = []
-    variables:EaVariable[] = []
-    statements:EaObject[] = []
-    classs:EaClass[]  = []              
+    private _functions:EaFunction[] = []
+    private _variables:EaVariable[] = []
+    private _statements:EaObject[] = []
+    private _classs:EaClass[]  = []              
     // 保存按顺序遍历的对象
-    objects:EaObject[] = []
+    private _objects:EaObject[] = []
+    protected _parsed:boolean = false
     constructor(node:Node | Props,parentNode?:t.Node){
-        super(node,parentNode)
-        this.parse()
+        super(node,parentNode)        
     }
     get sourceType(){
         return this.ast.sourceType
     } 
+    get functions(){
+        if(!this._parsed) this.parse()
+        return this._functions        
+    }
+    get variables(){
+        if(!this._parsed) this.parse()
+        return this._variables        
+    }
+    get statements(){
+        if(!this._parsed) this.parse()
+        return this._statements        
+    }
+    get classs(){
+        if(!this._parsed) this.parse()
+        return this._classs        
+    }
+    get objects(){
+        if(!this._parsed) this.parse()
+        return this._objects        
+    }
+
     /**
      * 遍历所有节点生成functions,variables,class等对象
      */
     parse(){
-        this.functions=[]
-        this.variables=[]
-        this.statements=[]
-        this.classs =[]        
-        this.objects=[]
-        this.objects = [...this.getIterator()]
+        this._functions=[]
+        this._variables=[]
+        this._statements=[]
+        this._classs =[]      
+        this._objects = [...this.getIterator()]
+        this._parsed = true
     }
     /**
      * 返回this.objects的可迭代对象
      * @returns 
      */
     [Symbol.iterator](): Iterator<EaObject>{
+        if(!this._parsed) this.parse()
         return this.objects[Symbol.iterator]()
     }
     /**
@@ -77,29 +97,29 @@ export class EaStatement<Node extends t.Node=t.Node,Props extends IEaObjectProps
                     return node
                 }else if(t.isImportDeclaration(node)){
                     return node
+                }else if(t.isVariableDeclaration(node)){
+                    return node.declarations
                 }else{
                     return node
                 }               
             },
-            transform:(node:t.Node)=>{
+            transform:(node:t.Node,parent:t.Node)=>{
                 let eaObject
                 if(t.isFunctionDeclaration(node)){
                     eaObject = new EaFunction(node,this.ast)
-                    this.functions.push(eaObject)
+                    this._functions.push(eaObject)
                 }else if(t.isVariableDeclarator(node)){
-                    eaObject = new EaVariable(node,this.ast)
-                    this.variables.push(eaObject)
+                    eaObject = new EaVariable(node,parent)
+                    this._variables.push(eaObject)
                 }else if(t.isClassDeclaration(node)){
                     eaObject = new EaClass(node,this.ast)
-                    this.classs.push(eaObject)
-                }else if(t.isExpression(node)){
-                    eaObject = new EaExpression(node,this.ast)
-                }else if(t.isBlockStatement(node)){
+                    this._classs.push(eaObject)
+                }else if(t.isStatement(node)){
                     eaObject = new EaStatement(node,this.ast)
-                    this.statements.push(eaObject)
+                    this._statements.push(eaObject)
                 }else{                    
                     eaObject = this.createEaObject(node)
-                } 
+                }  
                 return eaObject
             },
             recursion:true
