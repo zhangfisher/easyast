@@ -6,7 +6,7 @@
  */
 
 import * as t from '@babel/types';  
-import { EaObject,IEaObjectProps } from './base';
+import { EaObject } from './base';
 import { getAstNodeCode, getAstNodeName, getTypeAnnotation } from './utils';
 import generate from '@babel/generator';
 import { EaStatement } from './statement'; 
@@ -14,31 +14,14 @@ import { EaArguemnt } from './arguemnt';
 import { EaFunctionReturns } from './function';
 
 
-export type IEaClassMethod = IEaObjectProps & Pick<t.ClassMethod,
-    'abstract'
-    | 'computed'
-    | 'static'
-    | 'generator'
-    | 'async'
-    | 'abstract'
-    | 'access'
-    | 'optional'
-    | 'override' 
-    | 'decorators'
-> & {
-    readonly: boolean
-}
 
 
-export class EaClassMethod extends EaObject<t.ClassMethod,IEaClassMethod> implements IEaClassMethod{ 
+export class EaClassMethod extends EaObject<t.ClassMethod>{ 
     private _arguments?:EaArguemnt[]      
     private _body?:EaStatement
     private _declaration?:string     
     private _returns?:EaFunctionReturns      
-
-    protected createAstNode(props:IEaClassMethod){
-        //return t.functionDeclaration(t.identifier(props.name||""),[],t.blockStatement([]),props.async,props.generator,props.arrow)
-    }
+ 
     /**
      * 函数名称
      */
@@ -165,19 +148,8 @@ export class EaClassSetter extends EaClassMethod{
 }
 
 
-export type IEaClassProperty = IEaObjectProps & Pick<t.ClassProperty,
-    'abstract'
-    | 'computed'  
-    | 'abstract' 
-    | 'optional'
-    | 'readonly' 
-    | 'decorators'    
-> & {
-    accessibility: t.ClassProperty['accessibility'] 
-}
 
-
-export class EaClassProperty extends EaObject<t.ClassProperty, IEaClassProperty> implements IEaClassProperty{
+export class EaClassProperty extends EaObject<t.ClassProperty>{
     private _declaration?:string          
   
     get name(){
@@ -227,11 +199,7 @@ export class EaClassProperty extends EaObject<t.ClassProperty, IEaClassProperty>
 }
 
 
-export interface IEaClass extends IEaObjectProps{ 
-
-}
-
-export class EaClass extends EaObject<t.ClassDeclaration,IEaClass> implements IEaClass{
+export class EaClass extends EaObject<t.ClassDeclaration>{
     private _declaration?:string    
     private _body?:EaStatement
     private _methods?:EaClassMethod[] 
@@ -243,7 +211,7 @@ export class EaClass extends EaObject<t.ClassDeclaration,IEaClass> implements IE
         return t.isIdentifier(this.ast.id) ? this.ast.id.name : ''
     }
     get body(){
-        return this._body || (this._body = new EaStatement(this.ast.body,undefined))
+        return this.ast.body.body
     }
     /**
      * 返回父类

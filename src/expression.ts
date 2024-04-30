@@ -20,14 +20,11 @@ import * as t from "@babel/types"
 import { EaObject } from './base';
 import { EaFunction } from "./function";
 import generate from "@babel/generator";
+import { EaIdentifier } from "./identifier";
 
 
 export interface IEaExpression{
 }
-
-//type Expression = ArrayExpression | AssignmentExpression | BinaryExpression | CallExpression | ConditionalExpression
-// | FunctionExpression | Identifier | StringLiteral | NumericLiteral | NullLiteral | BooleanLiteral 
-// | RegExpLiteral | LogicalExpression | MemberExpression | NewExpression | ObjectExpression | SequenceExpression | ParenthesizedExpression | ThisExpression | UnaryExpression | UpdateExpression | ArrowFunctionExpression | ClassExpression | ImportExpression | MetaProperty | Super | TaggedTemplateExpression | TemplateLiteral | YieldExpression | AwaitExpression | Import | BigIntLiteral | OptionalMemberExpression | OptionalCallExpression | TypeCastExpression | JSXElement | JSXFragment | BindExpression | DoExpression | RecordExpression | TupleExpression | DecimalLiteral | ModuleExpression | TopicReference | PipelineTopicExpression | PipelineBareFunction | PipelinePrimaryTopicReference | TSInstantiationExpression | TSAsExpression | TSSatisfiesExpression | TSTypeAssertion | TSNonNullExpression;
 
 export class EaExpression<T extends t.Node=t.Expression> extends EaObject<T>{ 
     get kind(){
@@ -134,9 +131,80 @@ export class EaLogicalExpression extends EaExpression<t.LogicalExpression>{
 }
 
 export class EaFunctionExpression extends EaExpression<t.FunctionExpression>{ 
- 
+    get id(){
+        return this.ast.id
+    }
+    get params(){
+        return this.ast.params
+    }
+    get body(){
+        return this.ast.body
+    }
+    get generator(){
+        return this.ast.generator
+    }
+    get async(){
+        return this.ast.async
+    } 
+    get returnType(){
+        return this.ast.returnType
+    }
+    get predicate(){
+        return this.ast.predicate
+    }
+    get typeParameters(){
+        return this.ast.typeParameters
+    }
 }
 
 
 export class EaCallExpression extends EaExpression<t.CallExpression>{  
+    get callee(){   
+        return this.ast.callee
+    }
+    get arguments(){
+        return this.ast.arguments
+    }
+    get optional(){
+        return this.ast.optional
+    }
+    get typeArguments(){
+        return this.ast.typeArguments
+    }
+    get typeParameters(){
+        return this.ast.typeParameters
+    }
 } 
+
+
+
+export function createExpressionObject(node:t.Expression,parent?:t.Node){
+    if(t.isBinaryExpression(node)){
+        return new EaBinaryExpression(node,parent)
+    }else if(t.isAssignmentExpression(node)){
+        return new EaAssignmentExpression(node,parent)
+    }else if(t.isMemberExpression(node)){
+        return new EaMemberExpression(node,parent)
+    }else if(t.isArrayExpression(node)){
+        return new EaArrayExpression(node,parent)
+    }else if(t.isAwaitExpression(node)){
+        return new EaAwaitExpression(node,parent)
+    }else if(t.isConditionalExpression(node)){
+        return new EaConditionalExpression(node,parent)
+    }else if(t.isNewExpression(node)){
+        return new EaNewExpression(node,parent)
+    }else if(t.isYieldExpression(node)){
+        return new EaYieldExpression(node,parent)
+    }else if(t.isLogicalExpression(node)){
+        return new EaLogicalExpression(node,parent)
+    }else if(t.isCallExpression(node)){
+        return new EaCallExpression(node,parent)
+    }else if(t.isFunctionExpression(node)){
+        return new EaFunctionExpression(node,parent)
+    }else if(t.isIdentifier(node)){
+        return new EaIdentifier(node,parent)
+    }else{
+        return new EaExpression(node,parent)
+    }
+    
+}

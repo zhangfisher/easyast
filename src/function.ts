@@ -1,33 +1,10 @@
 import * as t from '@babel/types';
 import { getAstLiteralValue, getAstNodeCode, getTypeAnnotation } from './utils';
 import { EaArguemnt } from './arguemnt';
-import { EaObject, IEaObjectProps } from './base';
-import { EaStatement } from './statement';
-import  generate from '@babel/generator';
+import { EaObject } from './base';
+import { EaStatement } from './statement'; 
  
-/**
- * 创建一个函数对象
- * 
- * - 传入一个FunctionDeclaration节点对象
- * new EaFunction(t.FunctionDeclaration)
- * - 传入一个节点对象 
- * new EaFunction({
- *    name:"函数名称",
- *    async:true,
- *    generator:true,
- *    args:[EaArguemnt,EaArguemnt] 
- * })
- * 
- */
-export interface EaFunctionProps extends IEaObjectProps{
-    name?:string
-    async?:boolean
-    generator?:boolean    
-    arrow?:boolean
-    args?:EaArguemnt[]
-    code?:string            // 函数代码
-}
-
+ 
 export class EaFunctionReturns extends EaObject<t.ReturnStatement>{
     private _typeAnnotation
     constructor(ast:t.ReturnStatement,typeAnnotation?:t.FunctionDeclaration['returnType']){
@@ -53,13 +30,13 @@ export class EaFunctionReturns extends EaObject<t.ReturnStatement>{
     }
 }
  
-export class EaFunction extends EaObject<t.FunctionDeclaration, EaFunctionProps>{
+export class EaFunction extends EaObject<t.FunctionDeclaration>{
     private _arguments?:EaArguemnt[]      
     private _body?:EaStatement
     private _declaration?:string    
     private _returns?:EaFunctionReturns      
 
-    protected createAstNode(props:EaFunctionProps){
+    protected createAstNode(code:string){
         //return t.functionDeclaration(t.identifier(props.name||""),[],t.blockStatement([]),props.async,props.generator,props.arrow)
     }
     /**

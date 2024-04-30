@@ -7,9 +7,13 @@ import { EaExport } from "./exports";
 import { EaImport } from "./imports";
 
 
-export class EaModule extends EaStatement<t.Program>{    
+export class EaModule extends EaStatement{    
     private _exports:EaExport[] = []      
     private _imports:EaImport[] = []     
+    
+    get sourceType(){
+        return (this.ast as unknown as t.Program).sourceType
+    } 
     parse(){
         this._exports=[]
         this._imports=[]

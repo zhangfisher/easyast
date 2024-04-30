@@ -1,48 +1,45 @@
 import  generate from '@babel/generator';
 import * as t from '@babel/types';  
-import { EaObject,IEaObjectProps } from './base'; 
+import { EaObject } from './base'; 
 import { getTypeAnnotation } from './utils';
-import { EaExpression } from './expression';
+import {  createExpressionObject } from './expression';
+import { createLiteralObject } from './literal';
+import { createLValObject } from './lval';
 
-export interface IEaVariable extends IEaObjectProps{
-    name:string
-    typeAnnotation:string
-    value:any
-    kind:t.VariableDeclaration['kind'] | undefined
-}
-export class EaVariable extends EaObject<t.VariableDeclarator,IEaVariable> implements IEaVariable{
+
+export class EaVariable extends EaObject<t.VariableDeclarator> {
     [x: string]: any; 
     private _declaration?:string            
     get name(){
         return t.isIdentifier(this.ast.id) ? this.ast.id.name : ''
+    }
+    get id(){
+        return createLValObject(this.ast.id,this.parentAst)
     }
     /**
      * 变量的数据类型
      * 即typescript类型
      */
     get typeAnnotation(){
-        const typeAnnotation =  t.isIdentifier(this.ast.id) && this.ast.id.typeAnnotation ? this.ast.id.typeAnnotation : undefined
+        const typeAnnotation = t.isIdentifier(this.ast.id) && this.ast.id.typeAnnotation ? this.ast.id.typeAnnotation : undefined
         return getTypeAnnotation(typeAnnotation)
     }
     get value(){
         if(!this.ast.init) return undefined
         const initNode = this.ast.init
-        if(t.isBooleanLiteral(initNode)){
-            return initNode.value
-        }else if(t.isStringLiteral(initNode)){
-            return initNode.value
-        }else if(t.isNumericLiteral(initNode)){
-            return initNode.value
+        if(t.isLiteral(initNode)){
+            if('value' in initNode) return initNode.value
+            return createLiteralObject(initNode, this.parentAst)
         }else if(t.isExpression(initNode)){
-            return new EaExpression(initNode)
+            return createExpressionObject(initNode, this.parentAst)
         }else{
-            return generate(initNode,{compact:true}).code
-        }        
+            return generate(initNode).code
+        }    
     }
     /**
      * 值类型，针对typescript
      */
-    get valueType(){
+    get tsType(){
         if(!this.ast.init) return undefined
         return this.ast.init.type
     }
@@ -68,3 +65,10 @@ export class EaVariable extends EaObject<t.VariableDeclarator,IEaVariable> imple
     }
 }
 
+
+
+export function createVariableDeclarator(node:t.VariableDeclarator,parent?:t.Node){    
+    return new EaVariable(node,parent)
+}
+
+// type LVal = Identifier | MemberExpression | RestElement | AssignmentPattern | ArrayPattern | ObjectPattern | TSParameterProperty | TSAsExpression | TSSatisfiesExpression | TSTypeAssertion | TSNonNullExpression;

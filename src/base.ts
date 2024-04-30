@@ -1,13 +1,9 @@
 import * as t from "@babel/types"
 import generate from "@babel/generator";
 import traverse, { Scope } from "@babel/traverse"; 
-
-export interface IEaObjectProps extends Record<string,any>{
-
-}
  
 
-export class EaObject<Node extends t.Node=t.Node,Props extends IEaObjectProps = IEaObjectProps,ParentNode extends t.Node= t.Node>{
+export class EaObject<Node extends t.Node=t.Node,ParentNode extends t.Node= t.Node>{
     private _ast?:Node
     private _parentAst?:ParentNode
     /**
@@ -15,13 +11,13 @@ export class EaObject<Node extends t.Node=t.Node,Props extends IEaObjectProps = 
      * @param node      
      * @param parentNode  指定的是节点的上下文AST节点，用来确定节点所在的位置，如变量声明的上下文指的是所在的函数，函数是所在的父函数
      */
-    constructor(node:Node | Props,parentNode?:ParentNode){
+    constructor(node:Node | string,parentNode?:ParentNode){
         if(t.isNode(node)){
             this._ast = node as Node
-        }else if(typeof(node)=='object'){ //创建对象是使用
-            this._ast = this.createAstNode(node as Props) as unknown as Node
+        }else if(typeof(node)=='string'){ //创建对象是使用
+            this._ast = this.createAstNode(node) as unknown as Node
         }else{
-            throw new Error("node must be ASTNode or Object")        
+            throw new Error("node must be ASTNode or string code")        
         }
         this._parentAst = parentNode
     }
@@ -29,17 +25,11 @@ export class EaObject<Node extends t.Node=t.Node,Props extends IEaObjectProps = 
     get ast(){return this._ast!}
     get parentAst(){ return this._parentAst }    
     get loc(){return this.ast.loc}
-    get nodeType(){ return this.ast.type }
     get code(){
         return generate(this.ast,{
             retainLines:false,
             compact:false
         }).code
-    }  
-
-    get meta(){
-        // @ts-ignore
-        return this._ast?._eastAstMeta || {} 
     }  
     /**
      * 获取当前节点的上下文
@@ -49,10 +39,10 @@ export class EaObject<Node extends t.Node=t.Node,Props extends IEaObjectProps = 
     }
     /**
      * 供子类实现用来构建对应的Ast节点
-     * @param props 
+     * @param code 
      * @returns 
      */
-    protected createAstNode(props:Props){        
+    protected createAstNode(code:string){        
         throw new Error("createAstNode must be implemented")
     }    
     /**

@@ -16,9 +16,9 @@ describe("Variables",()=>{
         expect(code.variables[0].name).toBe("x")
         expect(code.variables[0].value).toBe(1)        
         expect(code.variables[0].kind).toBe("const")
-        // typeAnnotation指的是typescript类型声明,valueType指定是AST节点类型
+        // typeAnnotation指的是typescript类型声明,tsType指定是AST节点类型
         expect(code.variables[0].typeAnnotation).toBe("string")
-        expect(code.variables[0].valueType).toBe("NumericLiteral")
+        expect(code.variables[0].tsType).toBe("NumericLiteral")
     })
 
     test("声明多个不同基本数据类型的变量",()=>{
@@ -35,9 +35,9 @@ describe("Variables",()=>{
         expect(code.variables[0].typeAnnotation).toBe("string")
         expect(code.variables[1].typeAnnotation).toBe("number")
         expect(code.variables[2].typeAnnotation).toBe("boolean")
-        expect(code.variables[0].valueType).toBe("StringLiteral")
-        expect(code.variables[1].valueType).toBe("NumericLiteral")
-        expect(code.variables[2].valueType).toBe("BooleanLiteral")
+        expect(code.variables[0].tsType).toBe("StringLiteral")
+        expect(code.variables[1].tsType).toBe("NumericLiteral")
+        expect(code.variables[2].tsType).toBe("BooleanLiteral")
         expect(code.variables[0].kind).toBe("const")
         expect(code.variables[1].kind).toBe("const")
         expect(code.variables[2].kind).toBe("const")
@@ -58,9 +58,9 @@ describe("Variables",()=>{
         expect(code.variables[0].typeAnnotation).toBe("string")
         expect(code.variables[1].typeAnnotation).toBe("number")
         expect(code.variables[2].typeAnnotation).toBe("boolean")
-        expect(code.variables[0].valueType).toBe(undefined)
-        expect(code.variables[1].valueType).toBe(undefined)
-        expect(code.variables[2].valueType).toBe(undefined)
+        expect(code.variables[0].tsType).toBe(undefined)
+        expect(code.variables[1].tsType).toBe(undefined)
+        expect(code.variables[2].tsType).toBe(undefined)
         expect(code.variables[0].kind).toBe("let")
         expect(code.variables[1].kind).toBe("let")
         expect(code.variables[2].kind).toBe("let")
@@ -661,14 +661,53 @@ describe("Expression",()=>{
             1+1
             a+b+c
             x.y.z
+            f1()
+            b.test()
             new Date()
-            x.y.z()
+            x.y.z() 
         `)
-        expect(code.expressions.length).toBe(8)
+        expect(code.expressions.length).toBe(10)
 
     })
 })
+describe("If",()=>{  
+    test("条件语句",()=>{
+        const code = new EasyAST(`     
+            if(a==0){
+                0
+            }else if(a==1 & b==2){
+                1
+            }else if(a==2){
+                2
+            }else{
+                1000
+            }
+        `)
+        expect(code.statements.length).toBe(1) 
 
+    })
+})
+describe("For",()=>{  
+    test("For循环语句",()=>{
+        const code = new EasyAST(`     
+            for(let i=0;i<10;i++){
+                1
+            }
+        `)
+        expect(code.statements.length).toBe(1) 
+
+    })
+    test("ForOf循环语句",()=>{
+        const code = new EasyAST(`     
+            for(let [value,index] of [1,2,3]){
+                1
+            }
+        `)
+        expect(code.statements.length).toBe(1) 
+        expect(code.statements[0].left).toBe(1) 
+
+    })
+})
 
 // const a = 1,b=true,c="a"            
 // let d = a+b/2+Math.abs(x) 
