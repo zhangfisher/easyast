@@ -43,7 +43,7 @@ export class EasyAST extends EaModule{
         if(opts.typescript) babelOptions.plugins!.push("typescript")
         if(opts.jsx) babelOptions.plugins!.push("jsx")
         babelOptions.sourceType = isEsmModule(code) ?  'module' : 'script'        
-        super(parser.parse(code,babelOptions).program.body[0] as any,undefined,options)        
+        super(parser.parse(code,babelOptions).program as any,undefined,options)        
     }   
     get options(){
         return super.options as Required<EasyASTOptions & EaObjectOptions>

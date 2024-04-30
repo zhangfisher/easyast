@@ -1,8 +1,11 @@
-import { test,expect,describe } from "vitest" 
-import { EaIfStatement, EasyAST } from "../../src"
-import { codeGenerator } from "../utils"
+import { test,expect,describe, beforeAll } from "vitest" 
+import { EaIfStatement, EaObject, EasyAST } from "../../src"
+import { codeGenerator } from "../utils" 
 
 describe("If",()=>{  
+    beforeAll(()=>{
+        EaObject.generator = codeGenerator
+    })
     test("完整条件语句",()=>{
         const code = new EasyAST(`     
             if(a==0){
@@ -14,7 +17,7 @@ describe("If",()=>{
             }else{
                 1000
             }
-        `,{compact:false})
+        `)
         expect(code.statements.length).toBe(1) 
         expect(code.statements[0].type).toBe("IfStatement")
         const ifStatement = code.statements[0] as EaIfStatement

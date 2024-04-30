@@ -13,6 +13,7 @@ export interface EaObjectOptions extends Record<string,any>{
 
 
 export class EaObject<Node extends t.Node=t.Node,ParentNode extends t.Node= t.Node>{
+    static generator = (node:t.Node)=>generate(node,{retainLines:false,compact:false})
     private _ast?:Node
     private _parentAst?:ParentNode
     private _options:Required<EaObjectOptions>  
@@ -37,7 +38,7 @@ export class EaObject<Node extends t.Node=t.Node,ParentNode extends t.Node= t.No
     get ast(){return this._ast!}
     get parentAst(){ return this._parentAst }    
     get loc(){return this.ast.loc}    
-    get code(){return generate(this.ast).code}  
+    get code(){return (this.constructor as any).generator(this.ast).code}  
 
     /**
      * 供子类实现用来构建对应的Ast节点
