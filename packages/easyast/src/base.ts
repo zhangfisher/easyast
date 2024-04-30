@@ -1,17 +1,28 @@
 import * as t from "@babel/types"
-import generate from "@babel/generator";
 import traverse, { Scope } from "@babel/traverse"; 
- 
+import generate from '@babel/generator';
+
+
+
+export interface EaObjectOptions extends Record<string,any>{
+
+    // 代码生成选项
+    retainLines?:boolean,
+    compact?:boolean
+}
+
 
 export class EaObject<Node extends t.Node=t.Node,ParentNode extends t.Node= t.Node>{
     private _ast?:Node
     private _parentAst?:ParentNode
+    private _options:Required<EaObjectOptions>  
     /**
      * 
      * @param node      
      * @param parentNode  指定的是节点的上下文AST节点，用来确定节点所在的位置，如变量声明的上下文指的是所在的函数，函数是所在的父函数
      */
-    constructor(node:Node | string,parentNode?:ParentNode){
+    constructor(node:Node | string,parentNode?:ParentNode,options?:EaObjectOptions){
+        this._options = Object.assign({ retainLines:false,compact:false},options)
         if(t.isNode(node)){
             this._ast = node as Node
         }else if(typeof(node)=='string'){ //创建对象是使用
@@ -21,22 +32,13 @@ export class EaObject<Node extends t.Node=t.Node,ParentNode extends t.Node= t.No
         }
         this._parentAst = parentNode
     }
+    get options(){return this._options}
     get type(){ return this._ast!.type}
     get ast(){return this._ast!}
     get parentAst(){ return this._parentAst }    
-    get loc(){return this.ast.loc}
-    get code(){
-        return generate(this.ast,{
-            retainLines:false,
-            compact:false
-        }).code
-    }  
-    /**
-     * 获取当前节点的上下文
-     */
-    get context(){
-        return 
-    }
+    get loc(){return this.ast.loc}    
+    get code(){return generate(this.ast).code}  
+
     /**
      * 供子类实现用来构建对应的Ast节点
      * @param code 

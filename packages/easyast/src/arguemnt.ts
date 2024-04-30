@@ -1,6 +1,6 @@
 import * as t from '@babel/types';
 import { getAstLiteralValue, getAstNodeCode, getAstNodeName, getTypeAnnotation } from './utils';
-import { EaObject, IEaObjectProps } from './base';
+import { EaObject } from './base';
 
 
 export interface FunctionArguemntType{
@@ -9,10 +9,7 @@ export interface FunctionArguemntType{
     ast:t.Node
 }
 
-
-export interface IEaArguemntProps extends IEaObjectProps{
-
-}
+ 
 
 /**
  * 函数参数
@@ -26,7 +23,7 @@ export interface IEaArguemntProps extends IEaObjectProps{
  * arg.ast 获取参数的ast节点
  * 
  */
-export class EaArguemnt extends EaObject<t.Node,IEaArguemntProps>{ 
+export class EaArguemnt extends EaObject<t.Node>{ 
     /**
      * 参数名称
      */

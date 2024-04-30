@@ -67,7 +67,7 @@ export class EaVariable extends EaObject<t.VariableDeclarator> {
 
 
 
-export function createVariableDeclarator(node:t.VariableDeclarator,parent?:t.Node){    
+export function createVariableObject(node:t.VariableDeclarator,parent?:t.Node){    
     return new EaVariable(node,parent)
 }
 

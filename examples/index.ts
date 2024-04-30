@@ -1,6 +1,6 @@
 import fs from "fs-extra"
 import path from "path"
-import { EasyAST } from "../src"
+import { EasyAST } from "../packages/easyast/src"
 
 
 const jscode = fs.readFileSync(path.join(__dirname,"code/js-code.js")).toString()
