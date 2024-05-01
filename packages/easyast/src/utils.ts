@@ -1,25 +1,24 @@
 import generate, { GeneratorOptions } from '@babel/generator';
 import * as t from '@babel/types';
 import { EaObject } from './base';
-import { EaVariable, createVariableObject } from './variable';
+import { createVariableObject } from './variable';
 import { EaClass } from './classs';
-import { EaFunction } from './function';
-import { EaStatement, createStatementObject } from './statement';
+import { createStatementObject } from './statement';
 import { createExpressionObject } from './expression';
 import { createLValObject } from './lval';
 
 
-export function getEaObject(node:t.Node,parentNode?:t.Node){    
+export function getEaObject(node:t.Node,parentObject?:EaObject){    
     if(t.isVariableDeclarator(node)){
-        return createVariableObject(node,parentNode)
+        return createVariableObject(node,parentObject)
     }else if(t.isClassDeclaration(node)){
-        return new EaClass(node,parentNode)
+        return new EaClass(node,parentObject)
     }else if(t.isExpression(node)){
-        return createExpressionObject(node,parentNode)
+        return createExpressionObject(node,parentObject)
     }else if(t.isLVal(node)){
-        return createLValObject(node,parentNode)
+        return createLValObject(node,parentObject)
     }else if(t.isStatement(node)){
-        return createStatementObject(node,parentNode)
+        return createStatementObject(node,parentObject)
     }else{
         return new EaObject(node)
     }    

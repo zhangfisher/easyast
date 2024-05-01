@@ -6,6 +6,20 @@ import {  createExpressionObject } from './expression';
 import { createLiteralObject } from './literal';
 import { createLValObject } from './lval';
 
+export class EaVariableList extends EaObject<t.VariableDeclaration> {
+    get kind(){
+        return this.ast.kind
+    }
+    get declarations(){
+        return this.ast.declarations
+    }
+    toString(){
+        return generate(this.ast).code
+    }
+    get items(){
+        return this.ast.declarations.map(item=>createVariableObject(item,this))
+    }
+}
 
 export class EaVariable extends EaObject<t.VariableDeclarator> {
     [x: string]: any; 
@@ -14,7 +28,7 @@ export class EaVariable extends EaObject<t.VariableDeclarator> {
         return t.isIdentifier(this.ast.id) ? this.ast.id.name : ''
     }
     get id(){
-        return createLValObject(this.ast.id,this.parentAst)
+        return createLValObject(this.ast.id,this.parent)
     }
     /**
      * 变量的数据类型
@@ -29,9 +43,9 @@ export class EaVariable extends EaObject<t.VariableDeclarator> {
         const initNode = this.ast.init
         if(t.isLiteral(initNode)){
             if('value' in initNode) return initNode.value
-            return createLiteralObject(initNode, this.parentAst)
+            return createLiteralObject(initNode, this.parent?.ast)
         }else if(t.isExpression(initNode)){
-            return createExpressionObject(initNode, this.parentAst)
+            return createExpressionObject(initNode, this.parent)
         }else{
             return generate(initNode).code
         }    
@@ -47,7 +61,7 @@ export class EaVariable extends EaObject<t.VariableDeclarator> {
      * 变量声明方式：var let const
      */
     get kind(){
-        return this.parentAst && (this.parentAst as t.VariableDeclaration).kind
+        return this.parent && (this.parent.ast as t.VariableDeclaration).kind
     } 
     toString(){
         if(!this._declaration){
@@ -67,7 +81,7 @@ export class EaVariable extends EaObject<t.VariableDeclarator> {
 
 
 
-export function createVariableObject(node:t.VariableDeclarator,parent?:t.Node){    
+export function createVariableObject(node:t.VariableDeclarator,parent?:EaObject){    
     return new EaVariable(node,parent)
 }
 

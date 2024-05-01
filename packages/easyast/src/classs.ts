@@ -9,7 +9,7 @@ import * as t from '@babel/types';
 import { EaObject } from './base';
 import { getAstNodeCode, getAstNodeName, getTypeAnnotation } from './utils';
 import generate from '@babel/generator';
-import { EaStatement } from './statement'; 
+import { EaBlockStatement } from './statement'; 
 import { EaArguemnt } from './arguemnt';
 import { EaFunctionReturns } from './function';
 
@@ -18,7 +18,7 @@ import { EaFunctionReturns } from './function';
 
 export class EaClassMethod extends EaObject<t.ClassMethod>{ 
     private _arguments?:EaArguemnt[]      
-    private _body?:EaStatement
+    private _body?:EaBlockStatement
     private _declaration?:string     
     private _returns?:EaFunctionReturns      
  
@@ -95,7 +95,7 @@ export class EaClassMethod extends EaObject<t.ClassMethod>{
 
     get body(){
         if(!this._body){
-            this._body = new EaStatement(this.ast.body,undefined)
+            this._body = new EaBlockStatement(this.ast.body,undefined)
         }
         return this._body
     }
@@ -201,7 +201,7 @@ export class EaClassProperty extends EaObject<t.ClassProperty>{
 
 export class EaClass extends EaObject<t.ClassDeclaration>{
     private _declaration?:string    
-    private _body?:EaStatement
+    private _body?:EaBlockStatement
     private _methods?:EaClassMethod[] 
     private _properties?:EaClassProperty[]     
     private _getters?:EaClassGetter[]

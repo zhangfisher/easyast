@@ -46,7 +46,7 @@ export class EaAssignmentPattern extends EaPattern<t.AssignmentPattern>{
 }
 
 
-export function createPatternObject(node:t.Node,parent?:t.Node){
+export function createPatternObject(node:t.Node,parent?:EaObject){
     if(t.isArrayPattern(node)){
         return new EaArrayPattern(node as t.ArrayPattern,parent)
     }else if(t.isObjectPattern(node)){

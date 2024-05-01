@@ -178,7 +178,7 @@ export class EaCallExpression extends EaExpression<t.CallExpression>{
 
 
 
-export function createExpressionObject(node:t.Expression,parent?:t.Node){
+export function createExpressionObject(node:t.Expression,parent?:EaObject){
     if(t.isBinaryExpression(node)){
         return new EaBinaryExpression(node,parent)
     }else if(t.isAssignmentExpression(node)){

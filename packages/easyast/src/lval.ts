@@ -12,7 +12,7 @@ export class EaLVal extends EaObject<t.LVal>{
 }
 
 
-export function createLValObject(node:t.LVal,parent?:t.Node){
+export function createLValObject(node:t.LVal,parent?:EaObject ){
     if(t.isPattern(node)){
         return createPatternObject(node,parent)
     }else if(t.isIdentifier(node)){

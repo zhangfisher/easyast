@@ -8,7 +8,7 @@ export class EaImportSpecifier  extends EaObject<t.ImportSpecifier>{
      * 返回 "type" | "typeof" | "value"
      */
     get kind(){
-        const pKind =this.parentAst && t.isImportDeclaration(this.parentAst) ?  this.parentAst.importKind : undefined
+        const pKind =this.parent && t.isImportDeclaration(this.parent) ?  this.parent.importKind : undefined
         return pKind!=='value' ? pKind : this.ast.importKind
     }
     /**

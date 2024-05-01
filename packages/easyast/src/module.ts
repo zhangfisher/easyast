@@ -2,12 +2,12 @@
  * 用于外部引入的模块
  */
 import * as t from "@babel/types"
-import { EaStatement } from "./statement";
+import { EaBlockStatement } from "./statement";
 import { EaExport } from "./exports";
 import { EaImport } from "./imports";
 
 
-export class EaModule extends EaStatement{    
+export class EaModule extends EaBlockStatement{    
     private _exports:EaExport[] = []      
     private _imports:EaImport[] = []     
     

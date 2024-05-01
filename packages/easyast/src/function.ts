@@ -2,7 +2,7 @@ import * as t from '@babel/types';
 import { getAstLiteralValue, getAstNodeCode, getTypeAnnotation } from './utils';
 import { EaArguemnt } from './arguemnt';
 import { EaObject } from './base';
-import { EaStatement } from './statement'; 
+import { EaBlockStatement } from './statement'; 
  
  
 export class EaFunctionReturns extends EaObject<t.ReturnStatement>{
@@ -32,7 +32,7 @@ export class EaFunctionReturns extends EaObject<t.ReturnStatement>{
  
 export class EaFunction extends EaObject<t.FunctionDeclaration>{
     private _arguments?:EaArguemnt[]      
-    private _body?:EaStatement
+    private _body?:EaBlockStatement
     private _declaration?:string    
     private _returns?:EaFunctionReturns      
 
@@ -64,7 +64,7 @@ export class EaFunction extends EaObject<t.FunctionDeclaration>{
         return false
     }
     get body(){
-        return this._body || (this._body = new EaStatement(this.ast.body,undefined))
+        return this._body || (this._body = new EaBlockStatement(this.ast.body,undefined))
     } 
     /**
      * 函数返回值

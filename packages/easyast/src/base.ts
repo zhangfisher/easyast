@@ -12,17 +12,17 @@ export interface EaObjectOptions extends Record<string,any>{
 }
 
 
-export class EaObject<Node extends t.Node=t.Node,ParentNode extends t.Node= t.Node>{
+export class EaObject<Node extends t.Node=t.Node>{
     static generator = (node:t.Node)=>generate(node,{retainLines:false,compact:false})
     private _ast?:Node
-    private _parentAst?:ParentNode
+    private _parent?:EaObject
     private _options:Required<EaObjectOptions>  
     /**
      * 
      * @param node      
-     * @param parentNode  指定的是节点的上下文AST节点，用来确定节点所在的位置，如变量声明的上下文指的是所在的函数，函数是所在的父函数
+     * @param parent  指定的是节点的上下文AST节点，用来确定节点所在的位置，如变量声明的上下文指的是所在的函数，函数是所在的父函数
      */
-    constructor(node:Node | string,parentNode?:ParentNode,options?:EaObjectOptions){
+    constructor(node:Node | string,parent?:EaObject,options?:EaObjectOptions){
         this._options = Object.assign({ retainLines:false,compact:false},options)
         if(t.isNode(node)){
             this._ast = node as Node
@@ -31,12 +31,12 @@ export class EaObject<Node extends t.Node=t.Node,ParentNode extends t.Node= t.No
         }else{
             throw new Error("node must be ASTNode or string code")        
         }
-        this._parentAst = parentNode
+        this._parent = parent
     }
     get options(){return this._options}
     get type(){ return this._ast!.type}
     get ast(){return this._ast!}
-    get parentAst(){ return this._parentAst }    
+    get parent(){ return this._parent }    
     get loc(){return this.ast.loc}    
     get code(){return (this.constructor as any).generator(this.ast).code}  
 
@@ -52,7 +52,7 @@ export class EaObject<Node extends t.Node=t.Node,ParentNode extends t.Node= t.No
     *  该函数是否有导出
     */
     get isExported(){
-        return this.parentAst && t.isExportNamedDeclaration(this.parentAst)
+        return this.parent && t.isExportNamedDeclaration(this.parent.ast)
     }
     /**
      * 获取节点的声明代码
