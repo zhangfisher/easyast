@@ -1,5 +1,5 @@
 import * as t from '@babel/types';
-import { FlexIterator } from './utils';
+import { FlexIterator } from 'flex-tools/iterators/flexiterator';
 import { EaFunction } from './function';
 import { EaVariable, EaVariableList } from './variable';
 import { EaObject, } from './base';
@@ -102,6 +102,7 @@ export class EaBlockStatement extends EaObject<t.BlockStatement>{
                         return node
                     }                    
                 }else if(t.isVariableDeclaration(node)){
+                    let varList = new EaVariableList(node,this)
                     return node.declarations
                 }else if(t.isExportAllDeclaration(node)){                    
                     return node
