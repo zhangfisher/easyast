@@ -47,12 +47,21 @@ export class EaObject<Node extends t.Node=t.Node>{
      */
     protected createAstNode(code:string){        
         throw new Error("createAstNode must be implemented")
-    }    
+    }  
+
     /**
-    *  该函数是否有导出
+    *  是否导出
     */
     get isExported(){
-        return this.parent && t.isExportNamedDeclaration(this.parent.ast)
+        if(!this.parent) return false 
+        let parent:EaObject = this
+        do{
+            parent= parent.parent as EaObject
+            if(t.isExportDeclaration(parent.ast)){
+                return true
+            }
+        }while(parent)
+        return false
     }
     /**
      * 获取节点的声明代码
@@ -69,21 +78,21 @@ export class EaObject<Node extends t.Node=t.Node>{
      * 在当前节点上查找函数
      * @param name 
      */
-    findFunction(name:string,options?:{deep:false,scope?:Scope}){
+    find(name:string,options?:{deep:false,scope?:Scope}){
         const opts = Object.assign({deep:false},options)
         traverse(this.ast,{
             FunctionDeclaration(path){
                 console.log(path)
             }
         },opts.scope)
-    }
-    findLiteral(value:any){
+    } 
 
+    /**
+     * 查找引用
+     */
+    getReferences(){
+        return []
     }
-    findVariable(name:string){
 
-    }
-    findClass(name:string){
 
-    }
 }

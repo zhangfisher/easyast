@@ -1,6 +1,7 @@
 import * as t from '@babel/types'
 import generate from '@babel/generator'
-
+import { beforeAll as viteBeforeAll } from 'vitest'
+import { EaObject } from '../src/base'
 
 /**
  * 测试时为了方便进行代码断言，压缩生成代码
@@ -13,3 +14,8 @@ export function codeGenerator(node:t.Node){
         compact:true
     })
 }
+
+export const beforeAll = (fn?:Function)=>viteBeforeAll(async ()=>{
+    EaObject.generator = codeGenerator
+    if(fn) await fn()
+})

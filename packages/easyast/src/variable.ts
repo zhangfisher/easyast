@@ -6,7 +6,11 @@ import {  createExpressionObject } from './expression';
 import { createLiteralObject } from './literal';
 import { createLValObject } from './lval';
 
-export class EaVariableList extends EaObject<t.VariableDeclaration> {
+export class EaVariableDeclaration extends EaObject<t.VariableDeclaration> {
+    private _items:EaVariable[]=[]
+    createAstNode(){
+        return t.variableDeclaration(this.ast.kind,this.ast.declarations)
+    }
     get kind(){
         return this.ast.kind
     }
@@ -17,15 +21,25 @@ export class EaVariableList extends EaObject<t.VariableDeclaration> {
         return generate(this.ast).code
     }
     get items(){
-        return this.ast.declarations.map(item=>createVariableObject(item,this))
+        if(this._items.length==0){
+            this._items = this.ast.declarations.map(item=>createVariableObject(item,this))
+        }
+        return this._items
     }
 }
 
 export class EaVariable extends EaObject<t.VariableDeclarator> {
     [x: string]: any; 
-    private _declaration?:string            
+    private _declaration?:string          
     get name(){
         return t.isIdentifier(this.ast.id) ? this.ast.id.name : ''
+    }
+    set name(value:string){
+        if(t.isIdentifier(this.ast.id)){
+            this.ast.id.name = value
+        }else{
+            throw new Error('Only Identifier can set name')
+        }
     }
     get id(){
         return createLValObject(this.ast.id,this.parent)
@@ -84,5 +98,3 @@ export class EaVariable extends EaObject<t.VariableDeclarator> {
 export function createVariableObject(node:t.VariableDeclarator,parent?:EaObject){    
     return new EaVariable(node,parent)
 }
-
-// type LVal = Identifier | MemberExpression | RestElement | AssignmentPattern | ArrayPattern | ObjectPattern | TSParameterProperty | TSAsExpression | TSSatisfiesExpression | TSTypeAssertion | TSNonNullExpression;

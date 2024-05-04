@@ -6,8 +6,8 @@ import { EasyAST } from "../../src"
 describe("Exports",()=>{  
     test("遍历模块的导出",()=>{
         const code = new EasyAST(`
-            export const a =1 ,b=2, c=3,d = ()=>1, e = /^f/g
-            export function f1(){}
+            export function f1(){}    
+            export const a =1 ,b=2, c=3,d = ()=>1, e = /^f/g            
             export const f2=()=>{}
             export class C{}
             export {a,f1,C as C1}            

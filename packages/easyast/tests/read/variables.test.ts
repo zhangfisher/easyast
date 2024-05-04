@@ -1,8 +1,9 @@
 import { test,expect,describe } from "vitest" 
 import { EasyAST } from "../../src"
-
+import { beforeAll } from "../utils"
 
 describe("Variables",()=>{ 
+    beforeAll()
     test("常量声明",()=>{
         const code = new EasyAST("const x:string = 1")
         expect(code.variables.length).toBe(1)
@@ -12,6 +13,9 @@ describe("Variables",()=>{
         // typeAnnotation指的是typescript类型声明,tsType指定是AST节点类型
         expect(code.variables[0].typeAnnotation).toBe("string")
         expect(code.variables[0].tsType).toBe("NumericLiteral")
+        code.variables[0].name="y"
+        expect(code.variables[0].name).toBe("y")
+        expect(code.toString()).toBe("const y: string = 1")
     })
 
     test("声明多个不同基本数据类型的变量",()=>{

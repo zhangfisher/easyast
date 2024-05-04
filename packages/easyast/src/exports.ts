@@ -14,8 +14,8 @@ export class EaExportSpecifier  extends EaObject<t.ExportSpecifier>{
     /**
      * 导出的名称
      */
-    get exported(){
-        return t.isStringLiteral(this.ast.exported) ? this.ast.exported.value : this.ast.exported.name 
+    get exported() {
+        return t.isStringLiteral(this.ast.exported) ? this.ast.exported.value : this.ast.exported.name  
     } 
 }
 
@@ -29,12 +29,13 @@ export class EaExport extends EaObject<t.ExportDeclaration>{
         if(!this._specifiers){
             if(t.isExportNamedDeclaration(this.ast) && this.ast.specifiers.length>0){
                 this._specifiers = this.ast.specifiers.map((node)=>{
-                    return new EaExportSpecifier(node,this.ast)
+                    return new EaExportSpecifier(node as any,this)
                 })
             }
         }
         return this._specifiers
     }
+    
     get source(){
         return t.isExportAllDeclaration(this.ast) ?  this.ast.source.value : ''
     }
@@ -55,5 +56,6 @@ export class EaExport extends EaObject<t.ExportDeclaration>{
         return t.isExportDefaultDeclaration(this.ast)
     }
 
-}
 
+}
+ 

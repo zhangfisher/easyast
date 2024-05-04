@@ -27,19 +27,16 @@ export class EaModule extends EaBlockStatement{
         if(!this._parsed) this.parse()
         return this._imports        
     }
-    createEaObject(node:t.Node){
-        let eaObject
-        if(t.isExportDeclaration(node)){
-            eaObject = new EaExport(node,this.ast)
-            this._exports.push(eaObject)
-            return eaObject
-        }else if(t.isImportDeclaration(node)){
-            eaObject = new EaImport(node,this.ast) 
-            this._imports.push(eaObject)
-            return eaObject                 
-        }else{
-            return super.createEaObject(node)
-        }
+
+    createExportedObject(node:t.ExportDeclaration){
+        let eaObject= new EaExport(node,this)
+        this._exports.push(eaObject)
+        return eaObject  
+    }
+    createImportedObject(node:t.ImportDeclaration){
+        let eaObject = new EaImport(node,this) 
+        this._imports.push(eaObject)
+        return eaObject            
     }
 }
 

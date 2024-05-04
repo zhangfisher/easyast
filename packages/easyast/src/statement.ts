@@ -1,7 +1,7 @@
 import * as t from '@babel/types';
-import { FlexIterator } from 'flex-tools/iterators/flexiterator';
+import { FlexIterator, SKIP } from 'flex-tools/iterators/flexiterator';
 import { EaFunction } from './function';
-import { EaVariable, EaVariableList } from './variable';
+import { EaVariable, EaVariableDeclaration } from './variable';
 import { EaObject, } from './base';
 import { EaClass } from './classs';
 import {  EaExpression,createExpressionObject } from './expression'; 
@@ -12,7 +12,8 @@ export interface IEaStatement extends EaObject{}
 
 export class EaBlockStatement extends EaObject<t.BlockStatement>{
     private _functions:EaFunction[] = []
-    private _variables:EaVariableList[] = [] 
+    private _variables:EaVariable[] = [] 
+    private _variableDeclarations:EaVariableDeclaration[] = [] 
     private _statements:EaObject[] = []
     private _classs:EaClass[]  = []    
     private _expressions:(EaExpression|EaIdentifier)[] =[]
@@ -84,38 +85,18 @@ export class EaBlockStatement extends EaObject<t.BlockStatement>{
     getIterator(){
         if(!('body' in this.ast)) return []
         return (new FlexIterator<any,any,any>(this.ast.body,{
-            pick:(node)=>{
-                if(t.isExportNamedDeclaration(node)){
-                    const declaration = (node as t.ExportNamedDeclaration).declaration
-                    if(declaration){
-                        if(t.isVariableDeclaration(declaration)){
-                            const declarations = (declaration as t.VariableDeclaration).declarations
-                            declarations.forEach((node)=>{
-                                // @ts-ignore
-                                node._easyAstMeta = {exported :true}
-                            })
-                            return declarations
+            pick:(node)=>{ 
+                if(t.isExportDeclaration(node)){
+                    const exportObject   = this.createExportedObject(node)
+                    if(t.isExportNamedDeclaration(node) || t.isExportDefaultDeclaration(node)){
+                        if(node.declaration){
+                            return {value:node.declaration,parent:exportObject}         
                         }else{
-                            return declaration
-                        }                    
-                    }else {
-                        return node
-                    }                    
-                }else if(t.isVariableDeclaration(node)){
-                    let varList = new EaVariableList(node,this)
-                    return node.declarations
-                }else if(t.isExportAllDeclaration(node)){                    
-                    return node
-                }else if(t.isExportDefaultDeclaration(node)){
-                    return node.declaration
-                }else if(t.isExportNamespaceSpecifier(node)){
-                    return node
-                }else if(t.isExportSpecifier(node)){
-                    return node
-                }else if(t.isExportDeclaration(node)){
-                    return node
-                }else if(t.isImportDeclaration(node)){
-                    return node
+                            return node
+                        }                        
+                    }else{
+                        return node  // export * from
+                    }               
                 }else if(t.isStatement(node)){
                     if(t.isExpressionStatement(node)){
                         if(t.isExpression(node.expression)){
@@ -132,19 +113,20 @@ export class EaBlockStatement extends EaObject<t.BlockStatement>{
             },
             transform:(node:t.Node,parent:EaObject)=>{
                 let eaObject
-                if(t.isFunctionDeclaration(node)){
-                    eaObject = new EaFunction(node,this)
+                if(t.isVariableDeclaration(node)){  // 变量声明
+                    eaObject = this.createVariableDeclarationObject(node,parent)
+                    this._variables.push(...eaObject.items) 
+                }else if(t.isFunctionDeclaration(node)){
+                  eaObject = new EaFunction(node,parent)
                     this._functions.push(eaObject)
-                }else if(t.isVariableDeclarator(node)){
-                    eaObject = new EaVariable(node,parent)
-                    this._variables.push(eaObject)
                 }else if(t.isClassDeclaration(node)){
-                    eaObject = new EaClass(node,this)
+                    eaObject = new EaClass(node,parent)
                     this._classs.push(eaObject)
                 }else if(t.isExpression(node)){
                     eaObject = this.createExpressionObject(node,parent)
                     this._expressions.push(eaObject as EaExpression)                        
-                        
+                }else if(t.isExportDeclaration(node)){
+                    return SKIP  // 因为在pick中已经创建了
                 }else if(t.isStatement(node)){
                     eaObject = createStatementObject(node,parent)
                     this._statements.push(eaObject)                    
@@ -156,6 +138,23 @@ export class EaBlockStatement extends EaObject<t.BlockStatement>{
             recursion:true
         }))
     } 
+    /**
+     * 变量声明
+     * @param node 
+     * @param parent 
+     * @returns 
+     */
+    createVariableDeclarationObject(node:t.VariableDeclaration,parent:EaObject){
+        const declaration = new EaVariableDeclaration(node,parent)
+        this._variableDeclarations.push(declaration)
+        return new EaVariableDeclaration(node,parent)
+    }
+    /**
+     * 表达式对象
+     * @param node 
+     * @param parent 
+     * @returns 
+     */
     createExpressionObject(node:t.Expression,parent:EaObject){
         if(!parent) parent = this
         return createExpressionObject(node,parent)
@@ -168,6 +167,13 @@ export class EaBlockStatement extends EaObject<t.BlockStatement>{
      */
     createEaObject(node:t.Node):EaObject | undefined{
         return new EaObject(node,this)
+    }
+    createExportedObject(node:t.ExportDeclaration){
+        return new EaObject(node,this)    
+    }
+    
+    createImportedObject(node:t.ImportDeclaration){
+        return new EaObject(node,this)    
     }
 }
 
