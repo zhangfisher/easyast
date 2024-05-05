@@ -18,8 +18,6 @@
 
 import * as t from "@babel/types"
 import { EaObject } from './base';
-import { EaFunction } from "./function";
-import generate from "@babel/generator";
 import { EaIdentifier } from "./identifier";
 
 
@@ -76,7 +74,17 @@ export class EaBinaryExpression extends EaExpression<t.BinaryExpression>{
     }
 }
 
-
+export class EaUnaryExpression extends EaExpression<t.UnaryExpression>{
+    get operator(){
+        return this.ast.operator
+    }
+    get argument(){
+        return this.ast.argument
+    }
+    get prefix(){
+        return this.ast.prefix
+    }
+}
 export class EaConditionalExpression extends EaExpression<t.ConditionalExpression>{ 
     get test(){
         return this.ast.test  
@@ -201,6 +209,8 @@ export function createExpressionObject(node:t.Expression,parent?:EaObject){
         return new EaCallExpression(node,parent)
     }else if(t.isFunctionExpression(node)){
         return new EaFunctionExpression(node,parent)
+    }else if(t.isUnaryExpression(node)){
+        return new EaUnaryExpression(node,parent)
     }else if(t.isIdentifier(node)){
         return new EaIdentifier(node,parent)
     }else{

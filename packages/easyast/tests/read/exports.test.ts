@@ -22,7 +22,7 @@ describe("Exports",()=>{
         expect(code.functions.length).toBe(2)
         expect(code.variables.length).toBe(6)
         expect(code.classs.length).toBe(1)
-        expect(code.exports.length).toBe(7)
+        expect(code.exports.length).toBe(12)
 
         expect(code.variables[0].name).toBe("a")
         expect(code.variables[1].name).toBe("b")
@@ -31,7 +31,13 @@ describe("Exports",()=>{
         expect(code.variables[4].name).toBe("e")
         expect(code.variables[5].name).toBe("f2")
 
-        expect(code.variables[0].exported).toBe(true)
+        expect(code.variables[0].isExported).toBe(true)
+        expect(code.variables[1].isExported).toBe(true)
+        expect(code.variables[2].isExported).toBe(true)
+        expect(code.variables[3].isExported).toBe(true)
+        expect(code.variables[4].isExported).toBe(true)
+        expect(code.variables[5].isExported).toBe(true)
+        
 
     })
 })

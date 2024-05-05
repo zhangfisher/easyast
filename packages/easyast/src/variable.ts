@@ -42,7 +42,15 @@ export class EaVariable extends EaObject<t.VariableDeclarator> {
         }
     }
     get id(){
-        return createLValObject(this.ast.id,this.parent)
+        return createLValObject(this.ast.id,this)
+    }
+    /**
+     * 当变量是解构赋值时，返回解构模式
+     */
+    get pattern(){
+        if(t.isPattern(this.ast.id)){
+            return createLValObject(this.ast.id,this)
+        }
     }
     /**
      * 变量的数据类型
@@ -57,7 +65,7 @@ export class EaVariable extends EaObject<t.VariableDeclarator> {
         const initNode = this.ast.init
         if(t.isLiteral(initNode)){
             if('value' in initNode) return initNode.value
-            return createLiteralObject(initNode, this.parent?.ast)
+            return createLiteralObject(initNode, this.parent)
         }else if(t.isExpression(initNode)){
             return createExpressionObject(initNode, this.parent)
         }else{

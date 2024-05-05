@@ -182,7 +182,7 @@ export class EaBlockStatement extends EaObject<t.BlockStatement>{
 export class EaIfStatement extends EaObject<t.IfStatement>{
     private _else?:EaBlockStatement
     get condition(){
-        return createExpressionObject(this.ast.test)
+        return createExpressionObject(this.ast.test,this)
     }
     get if(){
         return new EaBlockStatement(this.ast.consequent as t.BlockStatement,this)
@@ -197,7 +197,7 @@ export class EaIfStatement extends EaObject<t.IfStatement>{
         if(node){
             while(t.isIfStatement(node)){
                 ifStatements.push({
-                    condition:createExpressionObject(node.test) as EaExpression,
+                    condition:createExpressionObject(node.test,this) as EaExpression,
                     body:new EaBlockStatement(node.consequent as t.BlockStatement,this)
                 })
                 node = node.alternate
@@ -209,24 +209,25 @@ export class EaIfStatement extends EaObject<t.IfStatement>{
     }
 }
 
-export class EaForStatement extends EaObject<t.ForStatement>{
-    get init(){
+export class EaForStatement<Init=any> extends EaObject<t.ForStatement>{
+    get init():Init | undefined{
         if(this.ast.init){
             if(t.isVariableDeclaration(this.ast.init)){
-                return this.ast.init.declarations.map(v=>new EaVariable(v,this))
+                const declaration = new EaVariableDeclaration(this.ast.init,this)
+                return this.ast.init.declarations.map(v=>new EaVariable(v,declaration)) as Init
             }else{
-                return createExpressionObject(this.ast.init)
+                return createExpressionObject(this.ast.init,this) as Init
             }
         }        
     }
     get condition(){
         if(this.ast.test){
-            return createExpressionObject(this.ast.test)
+            return createExpressionObject(this.ast.test,this)
         }        
     }
     get update(){
         if(this.ast.update){
-            return createExpressionObject(this.ast.update)
+            return createExpressionObject(this.ast.update,this)
         }        
     }
     get body(){
@@ -238,14 +239,15 @@ export class EaForOfStatement extends EaObject<t.ForOfStatement>{
     get left(){
         if(this.ast.left){
             if(t.isVariableDeclaration(this.ast.left)){
-                return this.ast.left.declarations.map(declarator=>new EaVariable(declarator,this))
+                const declaration = new EaVariableDeclaration(this.ast.left,this)
+                return this.ast.left.declarations.map(declarator=>new EaVariable(declarator,declaration))
             }else{
                 return new EaObject(this.ast.left,this)
             }            
         }        
     }
     get right(){
-        return createExpressionObject(this.ast.right)
+        return createExpressionObject(this.ast.right,this)
     }
     get body(){
         return new EaBlockStatement(this.ast.body as t.BlockStatement,this)
@@ -255,7 +257,8 @@ export class EaForInStatement extends EaObject<t.ForInStatement>{
     get left(){
         if(this.ast.left){
             if(t.isVariableDeclaration(this.ast.left)){
-                return this.ast.left.declarations.map(declarator=>new EaVariable(declarator,this))
+                const declaration = new EaVariableDeclaration(this.ast.left,this)
+                return this.ast.left.declarations.map(declarator=>new EaVariable(declarator,declaration))
             }else{
                 return new EaObject(this.ast.left,this)
             }            
@@ -282,14 +285,14 @@ export class EaContinueStatement extends EaObject<t.ContinueStatement>{
 export class EaReturnStatement extends EaObject<t.ReturnStatement>{
     get argument(){
         if(this.ast.argument){
-            return createExpressionObject(this.ast.argument)
+            return createExpressionObject(this.ast.argument,this)
         }
     }
 }
 
 export class EaWithStatement extends EaObject<t.WithStatement>{
     get object(){
-        return createExpressionObject(this.ast.object)
+        return createExpressionObject(this.ast.object,this)
     }
     get body(){
         return new EaBlockStatement(this.ast.body as t.BlockStatement,this)
@@ -297,7 +300,7 @@ export class EaWithStatement extends EaObject<t.WithStatement>{
 }
 export class EaSwitchStatement extends EaObject<t.SwitchStatement>{
     get discriminant(){
-        return createExpressionObject(this.ast.discriminant)
+        return createExpressionObject(this.ast.discriminant,this)
     }
     get cases(){
         return this.ast.cases.map(node=>new EaSwitchCase(node,this))
@@ -306,7 +309,7 @@ export class EaSwitchStatement extends EaObject<t.SwitchStatement>{
 export class EaSwitchCase extends EaObject<t.SwitchCase>{
     get test(){
         if(this.ast.test){
-            return createExpressionObject(this.ast.test)
+            return createExpressionObject(this.ast.test,this)
         }
     }
     get consequent(){
@@ -316,7 +319,7 @@ export class EaSwitchCase extends EaObject<t.SwitchCase>{
 
 export class EaThrowStatement extends EaObject<t.ThrowStatement>{
     get argument(){
-        return createExpressionObject(this.ast.argument)
+        return createExpressionObject(this.ast.argument,this)
     }
 }
 export class EaCatchClause extends EaObject<t.CatchClause>{
@@ -345,11 +348,28 @@ export class EaTryStatement extends EaObject<t.TryStatement>{
         }
     }
 }
- 
+
+export class EaWhileStatement extends EaObject<t.WhileStatement>{
+    get condition(){
+        return createExpressionObject(this.ast.test,this)
+    }
+    get body(){
+        return new EaBlockStatement(this.ast.body as t.BlockStatement,this)
+    }
+}
+
+export class EaDoWhileStatement extends EaObject<t.DoWhileStatement>{
+    get condition(){
+        return createExpressionObject(this.ast.test,this)
+    }
+    get body(){
+        return new EaBlockStatement(this.ast.body as t.BlockStatement,this)
+    }
+}
+
 export class EaDebuggerStatement extends EaObject<t.DebuggerStatement>{
     
 }
-
 
 export function createStatementObject(node:t.Statement,parent?:EaObject){
     if(t.isIfStatement(node)){
@@ -374,6 +394,8 @@ export function createStatementObject(node:t.Statement,parent?:EaObject){
         return new EaDebuggerStatement(node,parent)
     }else if(t.isThrowStatement(node)){
         return new EaThrowStatement(node,parent)
+    }else if(t.isDoWhileStatement(node)){
+        return new EaDoWhileStatement(node,parent)
     }else{
         return new EaBlockStatement(node as t.BlockStatement,parent)
     }

@@ -37,7 +37,7 @@ export class EaTemplateLiteral extends EaLiteral<t.TemplateLiteral>{
     } 
 }
 
-export function createLiteralObject(node:t.Literal,parent?:t.Node){
+export function createLiteralObject(node:t.Literal,parent?:EaObject){
     if(t.isRegExpLiteral(node)){
         return new EaRegExpLiteral(node,parent)
     }else if(t.isTemplateLiteral(node)){
